@@ -1,0 +1,161 @@
+---
+title: Correctness of Hive on MR3, Presto, and Impala
+description: Correctness of Hive on MR3, Presto, and Impala
+slug: 2019-06-26-correctness-hivemr3-presto-impala
+authors: [glapark]
+tags: [Hive 3, Hive, Presto, Impala, TPC-DS]
+hide_table_of_contents: false
+---
+
+## Introduction
+
+Do you trust Hive?
+Do you trust Presto?
+Do you trust Impala?
+Do you trust your SQL system?
+
+<!-- truncate -->
+
+We usually trust popular SQL systems such as Hive, Presto, and Impala.
+All these systems have been battle tested in production environments for many years,
+which makes it reasonable to assume that typical queries (almost) always return correct results.
+Occasionally users find new bugs that produce wrong results,
+but more often than not, such a correctness bug manifests itself only on a small class of queries under special circumstances.
+Thus the discovery of new correctness bugs is no threat at all to the soundness of such mature systems, 
+and we keep running common queries without questioning the correctness of their results.
+
+On the other hand, 
+it can be a truly daunting task to manually verify the result of running a query. 
+How can we check for correctness the result of running a complex query on a multi-terabyte dataset
+that would produce millions of rows if not accompanied by the LIMIT clause?
+It may be that even finding the correct number of rows is practically impossible, let alone the correctness of their contents,
+because of the sheer size of the dataset.
+Ironically we may be more inclined to trust our SQL system precisely because there is no formal way to verify its soundness.
+
+Although it is hard to verify the soundness of an individual SQL system,
+we can compare several SQL systems together so as to gain (or lose) confidence on their correctness.
+For comparing three SQL systems, the idea goes as follows
+(which was inspired by the notion of relative soundness in the field of mathematical logic):
+
+* We run a query on target SQL systems using a sufficiently large dataset.
+* If all the results are identical (modulo rounding errors), 
+all the systems are sound with an extremely high probability, i.e., they return a correct answer to the query.
+* If only two systems agree on the result, 
+the remaining system is unsound with an extremely high probability, i.e., it returns a wrong answer to the query.
+* If all the systems differ in the result, we cannot draw any conclusion about their soundness 
+-- either all of them are unsound, or only one of them is sound.
+
+The rationale is that all the systems under comparison have been developed independently of each other.
+Thus, unless two systems process a query in a correct manner,
+the chance of accidentally producing the same result is infinitesimal. 
+By running many separate queries, we can further gain (or lose) confidence on their correctness.
+
+This article reports the result of crosschecking Hive on MR3, Presto, and Impala 
+using a variant of the TPC-DS benchmark (consisting of 99 queries) on a 10TB dataset.
+We take into account rounding errors, and discuss a few queries that produce different results.
+
+## Methodology
+
+We compare the following SQL-on-Hadoop systems using the TPC-DS benchmark.
+
+1. Hive 3.1.1 on MR3 0.7
+2. Presto 0.217 
+3. Impala 2.12.0+cdh5.15.2+0 in Cloudera CDH 5.15.2 
+
+We run the experiment in a 13-node cluster 
+using the same setting as in [our previous article](/blog/2019-03-22-performance-evaluation-0.6).
+The scale factor for the TPC-DS benchmark is 10TB.
+For Hive on MR3 and Presto, we generate the dataset in ORC.
+For Impala, we generate the dataset in Parquet.
+Both datasets are created from the same raw dataset and thus contain exactly the same collection of rows.
+
+In order to increase the chance that different results from the same query translate to different numbers of rows,
+we modify TPC-DS queries by replacing an existing LIMIT clause with a new SELECT clause. 
+For example,
+we extend query 12 with a new SELECT clause as follows:
+```
+with result as (
+---
+---
+--- *** original query 12 without the LIMIT clause ***
+---
+---)
+select i_item_desc ,i_category ,i_class ,i_current_price ,i_item_id, itemrevenue, revenueratio
+from result
+where itemrevenue >= 120700.0 * 1.5;
+```
+Here the constant in the WHERE clause `itemrevenue >= 120700.0 * 1.5` is chosen arbitrarily.
+(The modified query 12 returns 60152 rows instead of 100 rows.)
+Because of the use of arbitrary constants in the WHERE clause,
+two systems are now unlikely to produce the same number of rows unless both systems agree on the result.
+
+For Presto which uses slightly different SQL syntax, 
+we use another set of queries which are equivalent to the set for Impala and Hive on MR3 down to the level of constants. 
+The reader can find the set of modified TPC-DS queries 
+in the [GitHub repository](https://github.com/mr3-project/benchmark/tree/master/sample-queries-tpcds-hive4).
+
+## Result 
+
+For the reader&apos;s perusal,
+we attach the table containing the results of the experiment.
+For each query, we report the number of rows.
+If the result contains a single row, 
+we report the sum of all numerical values in it (marked in the column `Single row`).
+If a query does not compile (which occurs in Impala) or fails (which occurs only in Presto),
+we leave the cell blank (40 queries for Impala and 4 queries for Presto).
+Here is a link to [[Google Docs](https://docs.google.com/spreadsheets/d/1su72emIrwW2lPNBKXpXM0_2C1jsnmX9bUGi3UcEgekU/edit?usp=sharing)].
+<iframe 
+  src="https://docs.google.com/spreadsheets/d/1su72emIrwW2lPNBKXpXM0_2C1jsnmX9bUGi3UcEgekU/edit?usp=sharing?embedded=true"
+  width="100%" 
+  height="300px" 
+  style={{ border: "none" }}
+></iframe>
+
+## Analysis
+
+For most queries, the three systems return the same result and are thus sound with an extremely high probability.
+We assume that small differences in the number of rows are due to rounding errors
+(e.g., 692540 rows vs 690186 rows from query 11).
+Below we analyze those queries that produce clearly different results.
+
+#### Query 21
+
+Hive on MR3 reports about 10 percent fewer rows than Presto,
+and Impala fails to compile the query.
+Assuming that the discrepancy is not due to rounding errors,
+we conclude that at least one of Hive on MR3 and Presto is certainly unsound with respect to query 21.
+
+#### Query 31
+
+Hive on MR3 and Presto both report 249 rows whereas Impala reports 170 rows. 
+As the difference in the number of rows is rather large (about 30 percent of 249 rows),
+we conclude that Impala is probably unsound with respect to query 31. 
+
+#### Query 46, 53, 68, 81
+
+For each query,
+Hive on MR3 and Presto return the same result whereas Impala returns a smaller number of rows (up to 8 percent smaller).
+Thus we conclude that Impala is unsound with respect to these queries with a high probability.
+
+## Conclusion 
+
+In theory, unsoundness implies that a system is totally useless.
+This is because even if a system successfully returns an answer, 
+we run the risk of using a wrong answer as it is unknown whether the answer is correct or not. 
+Even in practice, there are many areas in which unsoundness is simply not acceptable.
+For example,
+nobody would use an unsound electronic calculator returning wrong answers occasionally, 
+even if it returned correct answers most of the times.
+
+Due to their complexity, 
+SQL systems are a good example of software systems whose unsoundness is well accepted.
+In this article,
+we have crosschecked three SQL systems for soundness,
+and found that all of them have a reasonable chance of being unsound with respect to the TPC-DS benchmark.
+For Impala, we have shown that it is probably unsound with respect to query 31.
+
+For developing Hive on MR3,
+checking its soundness against other SQL systems is an important part of testing and debugging.
+It helped us to find subtle errors that would be nearly impossible to detect through system testing only.
+Thus users of Hive on MR3 may assume that it guarantees at least the same level of correctness as Presto and Impala provide.
+

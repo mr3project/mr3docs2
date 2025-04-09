@@ -1,0 +1,10 @@
+{
+  "label": "Kerberos Authentication",
+  "position": 25,
+  "link": {
+    "slug": "guides/kerberos",
+    "type": "generated-index",
+    "description": "Using Kerberos authentication in Hive on MR3"
+  }
+}
+

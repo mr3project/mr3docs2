@@ -1,0 +1,10 @@
+{
+  "label": "Common Procedures",
+  "position": 5,
+  "link": {
+    "slug": "quick/k8s/common",
+    "type": "generated-index",
+    "description": "Additional procedures related to security in Hive on MR3"
+  }
+}
+

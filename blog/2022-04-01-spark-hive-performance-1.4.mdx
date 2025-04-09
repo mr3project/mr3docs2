@@ -1,0 +1,235 @@
+---
+title: 'Performance Evaluation of Spark 2, Spark 3, Hive-LLAP, and Hive on MR3'
+description: 'Performance Evaluation of Spark 2, Spark 3, Hive-LLAP, and Hive on MR3'
+slug: 2022-04-01-spark-hive-performance-1.4
+authors: [glapark]
+tags: [Hive, LLAP, Spark, TPC-DS]
+hide_table_of_contents: false
+---
+
+## Introduction
+
+In this article, we evaluate the performance of the following systems. 
+
+1. Spark 2.3.8
+2. Spark 3.2.1
+3. Hive 3.1.2 on MR3 1.4
+4. Hive-LLAP in HDP 3.1.4 (3.1.0.3.1.4.0-315)
+
+<!-- truncate -->
+
+The goal is 1) to show that Spark 3 achieves a major performance improvement over Spark 2,
+2) to compare Spark 3 and Hive 3 for performance,
+and 3) to compare Hive-LLAP and Hive 3 for performance.
+We use the TPC-DS benchmark with both sequential and concurrent tests.
+
+## Experiment setup
+
+#### Clusters
+
+For experiments, we use two clusters: **Indigo** and **Blue**.
+Indigo consists of 1 master and 22 worker nodes with the following properties:
+
+* 2 x Intel(R) Xeon(R) X5650 CPUs
+* 96GB of memory 
+* 6 x 500GB HDDs
+* 10 Gigabit network connection
+
+Blue consists of 1 master and 12 worker nodes with the following properties:
+
+* 2 x Intel(R) Xeon(R) E5-2640 v4 @ 2.40GHz
+* 256GB of memory 
+* 1 x 300GB HDD, 6 x 1TB SSDs
+* 10 Gigabit network connection
+
+In total, the amount of memory of worker nodes is
+22 * 96GB = 2112GB on the Indigo cluster and 12 * 256GB = 3072GB on the Blue cluster.
+Both Indigo and Blue run HDP 3.1.4 and use HDFS replication factor of 3. 
+
+#### Datasets
+
+We use a variant of the TPC-DS benchmark introduced in [a previous article](/blog/2019-06-26-correctness-hivemr3-presto-impala)
+which replaces an existing LIMIT clause with a new SELECT clause so that different results from the same query translate to different numbers of rows.
+The reader can find the two sets of modified TPC-DS queries in the [GitHub repository](https://github.com/mr3-project/benchmark/).
+
+The scale factors for the TPC-DS benchmark are 1TB and 3TB on the Indigo cluster, and
+1TB and 10TB on the Blue cluster.
+
+For best performance, we use Parquet for Spark and ORC for Hive.
+
+#### Configuration
+
+For all the experiments,
+the amount of memory allocated to JVM in each worker node 
+(Spark executor for Spark, LLAP daemon for Hive-LLAP,
+and MR3 ContainerWorkers for Hive on MR3)
+is the same: 80GB on the Indigo cluster and 216GB on the Blue cluster.
+For Spark, we choose configuration parameters after performance tuning using the dataset of 1TB.
+For Spark 3.2.1, we enable advanced features such as dynamic partition pruning and adaptive query execution.
+For Hive-LLAP, we use the default configuration set by HDP.
+
+#### Tests
+
+In a sequential test, we submit 99 queries from the TPC-DS benchmark.
+We report the total running time,
+the geometric mean of running times,
+and the running time of each individual query.
+
+In a concurrent test,
+we choose a concurrency level from 1 to 16/32 and start as many clients,
+each of which submits 17 queries, query 25 to query 40, from the TPC-DS benchmark.
+In order to better simulate a realistic environment,
+each client submits these 17 queries in a unique sequence.
+For each run, we measure the longest running time of all the clients.
+Since the cluster remains busy until the last client completes the execution of all its queries,
+the longest running time can be thought of as the cost of executing queries for all the clients.
+
+For Spark, we run Spark Thrift Server.
+For Hive, we run HiveServer2.
+
+#### Raw data of the experiment results
+
+For the reader&apos;s perusal,
+we attach the table containing the raw data of the experiment results.
+Here is a link to [[Google Docs](https://docs.google.com/spreadsheets/d/1ZA-OqakddKu5TQNW2jA7mwQ_b0E7OF9HDXIE_UsTaZA/edit?usp=sharing)].
+<iframe 
+src="https://docs.google.com/spreadsheets/d/1ZA-OqakddKu5TQNW2jA7mwQ_b0E7OF9HDXIE_UsTaZA/edit?usp=sharing?embedded=true"
+  width="100%" 
+  height="300px" 
+  style={{ border: "none" }}
+></iframe>
+
+## Experiment I. Spark 2.3.8 and Spark 3.2.1
+
+To compare Spark 2.3.8 and Spark 3.2.1,
+we use the dataset of 1TB on the Indigo and Blue clusters.
+
+#### Sequential test
+
+From the sequential test,
+Spark 3.2.1 runs about twice faster than Spark 2.4.8: 
+
+* On Indigo, 3419 seconds vs 6713 seconds
+* On Blue, 2783 seconds vs 6093 seconds
+
+![spark.2.3.sequential](/img/mr3.1.4/spark.2.3.sequential-fs8.png)
+
+#### Concurrent test
+
+From the concurrent test, Spark 3.2.1 runs much faster,
+or equivalently, yields much higher throughput than Spark 2.4.8.
+On the Indigo cluster with 16 concurrent queries,
+Spark 2.4.8 performs even worse than executing all the queries sequentially
+(695 seconds * 16 < 49087 seconds).
+
+![spark.2.3.concurrent.indigo](/img/mr3.1.4/spark.2.3.concurrent.indigo-fs8.png)
+
+![spark.2.3.concurrent.blue](/img/mr3.1.4/spark.2.3.concurrent.blue-fs8.png)
+
+In summary,
+**Spark 3.2.1 indeed achieves a major performance improvement over Spark 2.4.8.**
+As Spark 3 is no more difficult to operate than Spark 2,
+upgrading to Spark 3 should be a right decision in most cases. 
+
+## Experiment II. Spark 3.2.1 and Hive 3.1.2 on MR3 1.4
+
+In the previous experiment,
+the size of the dataset (1TB) is relatively small for the total amount of memory of worker nodes.
+In this experiment,
+we increase the size of the dataset to 3TB on Indigo and 10TB on Blue.
+We also compare Spark 3.2.1 and Hive 3.1.2 running on MR3 1.4
+to gain a sense of how Spark 3 compares with Hive 3 in general.
+
+#### Sequential test
+
+From the sequential test, Hive on MR3 runs much faster than Spark 3.2.1 in terms of the total running time.
+
+* On Indigo, 5344 seconds vs 9564 seconds.
+* On Blue, 9948 seconds vs 27104 seconds.
+
+![spark.2.3.concurrent.indigo](/img/mr3.1.4/spark.hivemr3.sequential-fs8.png)
+
+In terms of the geometric mean of running times,
+the performance gap is smaller.
+
+* On Indigo, 28.56 seconds vs 30.16 seconds
+* On Blue, 33.07 seconds vs 51.77 seconds
+
+This result implies that
+**despite the performance improvement over its previous version,
+Spark 3 is still slower than Hive 3, especially on long-running queries.**
+
+#### Concurrent test
+
+From the concurrent test in which we allow the concurrency level up to 32,
+we observe that Spark suffers from a heavy performance penalty
+as the concurrent level increases.
+For example,
+on the Indigo cluster with 32 concurrent queries,
+Spark performs even worse than executing all the queries sequentially
+(576 seconds * 32 < 131145 seconds).
+On the Blue cluster with 32 concurrent queries,
+Spark performs only slightly better than executing all the queries sequentially
+(49784 seconds / 1845 seconds = 26.97 vs 32).
+In contrast,
+the running time for Hive on MR3 is nearly proportional to the concurrency level.
+
+![spark.2.3.concurrent.indigo](/img/mr3.1.4/spark.hivemr3.concurrent.indigo-fs8.png)
+
+![spark.2.3.concurrent.indigo](/img/mr3.1.4/spark.hivemr3.concurrent.blue-fs8.png)
+
+The result shows that 
+**the current architecture of Spark has room for improvement
+for executing concurrent queries,** especially with a high concurrency level.
+We remark that with 32 concurrent queries,
+Spark fails to complete 1 query out of 32 * 17 = 544 queries.
+
+## Experiment III. Hive 3.1.2 on MR3 1.4 and Hive-LLAP in HDP 3.1.4
+
+In the last experiment,
+we use the dataset of 10TB to compare Hive on MR3 and Hive-LLAP on the Blue cluster.
+
+#### Sequential test
+
+In the sequential test, Hive-LLAP is about 10 percent faster than Hive on MR3.
+The performance gap is mainly due to several patches incorporated into Hive-LLAP
+which produce different execution plans than Hive on MR3.
+(Hive on MR3 has not yet backported these patches because of a correctness issue
+reported in [our previous article](/blog/2019-11-07-sparksql2.3.2-0.10).)
+
+![hdpllap.hivemr3.sequential](/img/mr3.1.4/hdpllap.hivemr3.sequential-fs8.png)
+
+#### Concurrent test
+
+In the concurrent test,
+Hive on MR3 is shown to be comparable to Hive-LLAP in terms of throughput.
+Hive on MR3 appears to yield slightly lower throughput than Hive-LLAP,
+but in the experiment, Hive-LLAP fails to complete several queries.
+
+* With 8 concurrent queries, Hive-LLAP fails to complete 1 query out of 8 * 17 = 136 queries.
+* With 16 concurrent queries, Hive-LLAP fails to complete 2 queries out of 16 * 17 = 272 queries.
+* With 32 concurrent queries, Hive-LLAP fails to complete 10 queries out of 32 * 17 = 544 queries.
+
+![hdpllap.hivemr3.concurrent](/img/mr3.1.4/hdpllap.hivemr3.concurrent-fs8.png)
+
+In summary,
+**Hive on MR3 is comparable to Hive-LLAP in terms of performance.**
+As it is much easier to operate than Hive-LLAP
+and also provides native support for Kubernetes,
+Hive on MR3 is a viable alternative to Hive-LLAP
+in terms of both performance and ease of use.
+
+## Conclusion
+
+Since the release of Hive 3.1 (which, unfortunately, has not been actively maintained),
+there has been no new release of Apache Hive,
+while Spark has seen a considerable improvement in its performance
+with an upgrade to Spark 3.
+The good news is that the Hive community has recently started to roll out
+new releases from the Hive 4 branch, with an initial release of Hive 4.0.0-alpha-1.
+From our preliminary evaluation,
+Hive 4 achieves a moderate performance improvement over Hive 3 
+(but not as much as Spark 3 achieves over Spark 2).
+When a stable release of Hive 4 is available,
+we will report the result of evaluating its performance.
+

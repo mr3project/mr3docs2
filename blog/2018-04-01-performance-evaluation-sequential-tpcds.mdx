@@ -1,0 +1,132 @@
+---
+title: Performance Evaluation of Hive on MR3 0.1 (Part I)
+description: Performance Evaluation of Hive on MR3 0.1 (Part I)
+slug: 2018-04-01-performance-evaluation-sequential-tpcds
+authors: [glapark]
+tags: [Hive 2, Hive 1, Hive, TPC-DS]
+hide_table_of_contents: false
+---
+
+## Introduction
+
+Since Hive running on top of MR3, or **Hive-MR3** henceforth, uses MR3 as its execution engine and borrows runtime environments from Tez,
+a natural question arises as to whether the use of MR3 results in performance improvement in terms of execution time, turnaround time, or overall throughput at all. 
+While it is difficult to accurately quantify the performance of MR3 over Tez as an execution engine, 
+we can compare Hive-MR3 and Hive-on-Tez under identical conditions to see if there is any benefit of using MR3 in place of Tez. 
+
+<!-- truncate -->
+
+In this article, we report the result of testing Hive-MR3 and Hive-on-Tez on the TPC-DS benchmark in a sequential execution setting. 
+We use exactly the same configuration files for both Hive-MR3 and Hive-on-Tez so that any discrepancy in performance can be attributed to the choice of the execution engine. 
+We use the following 7 combinations of Hive-MR3 and Tez runtime:
+
+1. Hive-MR3 based on Hive 1.2.2 + Tez 0.7.0 
+2. Hive-MR3 based on Hive 1.2.2 + Tez 0.8.4 
+3. Hive-MR3 based on Hive 1.2.2 + Tez 0.9.1 
+4. Hive-MR3 based on Hive 2.1.1 + Tez 0.8.4 
+5. Hive-MR3 based on Hive 2.1.1 + Tez 0.9.1 
+6. Hive-MR3 based on Hive 2.3.2 + Tez 0.8.4 
+7. Hive-MR3 based on Hive 2.3.2 + Tez 0.9.1 
+
+We run the experiment in two different clusters: **Red** and **Gold**.
+All the machines in both clusters are identical:
+
+* 2 x Intel(R) Xeon(R) X5650 CPUs
+* 96GB memory 
+* 6 x 500GB HDDs
+* 10 Gigabit network connection
+
+The Red cluster is configured as follows:
+
+* One master and 10 slaves
+* Hadoop 2.7.1
+* HDFS replication factor of 3
+* Security with Kerberos
+* Dataset with a scale factor of 1TB for the TPC-DS benchmark
+* 80GB memory for Yarn on every slave machine
+
+The Gold cluster is configured as follows:
+
+* Two masters (with a secondary namenode) and 40 slaves
+* Hadoop 2.7.1
+* HDFS replication factor of 3
+* No security 
+* Dataset with a scale factor of 10TB for the TPC-DS benchmark
+* 80GB memory for Yarn on every slave machine
+
+For each combination of Hive-MR3 and Tez runtime,
+we try MR3 and Tez as the execution engine (by setting `hive.execution.engine` to `mr3` or `tez` in `hive-site.xml`).
+For Hive-MR3 based on Hive 1.2.2,
+we use 58 queries from the TPC-DS benchmark (excluding query 64 and query 85).
+For Hive-MR3 based on Hive 2.x,
+we use 60 queries from the TPC-DS benchmark.
+For each run, we execute all the queries sequentially, starting from query 3 and ending with query 98, with a single Beeline connection.
+We reuse configuration settings in the directory `conf/tpcds` of the Hive-MR3 release for all runs,
+except that each container uses 4GB memory in the Red cluster and 5GB memory in the Gold cluster, respectively.
+For those runs in the Gold cluster, we run MR3 DAGAppMasters in [LocalProcess mode](/docs/features/mr3/master-worker-mode).
+Since we are interested only in the relative performance of MR3 with respect to Tez,
+our experiment does not enable various optimization features found in Hive 2.x. 
+
+## Experimental results in the Red cluster
+
+The following chart shows the total execution time (in seconds) for each run in the Red cluster:
+![tpcds.red.sequential.total.time](/img/mr3.0.1/tpcds.red.sequential.total.time-fs8.png)
+
+The following table shows: 1) the reduction in execution time (in percentage) when switching from Tez to MR3; 2) the number of queries for which Hive-MR3 runs faster than Hive-on-Tez (out of a total of 60 queries):
+
+|Hive-MR3 based on|Tez runtime|Reduction in execution time|Number of faster queries|
+|:---|:----------|:--------------------------|:----------------|
+|Hive 1.2.2|Tez 0.7.0 |7.18%  |45 |
+|          |Tez 0.8.4 |8.94%  |49 |
+|          |Tez 0.9.1 |12.00% |45 |
+|Hive 2.1.1|Tez 0.8.4 |10.43% |44 |
+|          |Tez 0.9.1 |10.40% |43 |
+|Hive 2.3.2|Tez 0.8.4 |11.51% |46 |
+|          |Tez 0.9.1 |9.21%  |44 |
+
+<br/><br/>
+
+## Experimental results in the Gold cluster
+
+The following chart shows the total execution time (in seconds) for each run in the Gold cluster:
+![tpcds.gold.sequential.total.time](/img/mr3.0.1/tpcds.gold.sequential.total.time-fs8.png)
+
+The following table shows: 1) the reduction in execution time (in percentage) when switching from Tez to MR3; 2) the number of queries for which Hive-MR3 runs faster than Hive-on-Tez (out of a total of 60 queries):
+
+|Hive-MR3 based on|Tez runtime|Reduction in execution time|Number of faster queries|
+|:---|:----------|:--------------------------|:----------------|
+|Hive 1.2.2|Tez 0.7.0 |1.74%  |42 |
+|          |Tez 0.8.4 |3.93%  |46 |
+|          |Tez 0.9.1 |4.53%  |45 |
+|Hive 2.1.1|Tez 0.8.4 |15.41% |46 |
+|          |Tez 0.9.1 |13.50% |44 |
+|Hive 2.3.2|Tez 0.8.4 |9.34%  |43 |
+|          |Tez 0.9.1 |12.27% |42 |
+
+<br/><br/>
+
+## Analysis of experimental results
+
+We observe that across all the combinations of Hive-MR3 and Tez runtime in both clusters, Hive-MR3 consistently outperforms Hive-on-Tez in terms of the total execution time of all queries.
+For example,
+Hive-MR3 based on Hive 2.1.1 reduces the total execution time by 15.41% in the Gold cluster. 
+On average, Hive-MR3 reduces the total execution time by 9.31% in comparison with Hive-on-Tez.
+Overall we conclude that MR3 has a clear advantage over Tez with respect to performance
+by virtue of simplicity in the design as well as efficiency in the implementation.
+
+Note that a reduction of 9.31% in the total execution time does mean that MR3 is merely 9.31% faster than Tez on average.
+In fact, MR3 is much faster than Tez because the majority of the execution time is spent not in the execution engine itself (DAGAppMaster in both MR3 and Tez)
+but in containers (ContainerWorker in MR3 and TezChild in Tez), which share the same runtime environment in both Hive-MR3 and Hive-on-Tez.
+As an example, for a hypothetical query whose execution alternates between the execution engine in 20% of the execution time and containers in 80% of the execution time,
+a reduction of 5% in the total execution time requires another execution execution engine that is twice faster 
+(provided that the behavior of containers remains the same).
+Thus the reduction in the total execution time up to 15.41% implies that 
+MR3 is indeed much faster than Tez as an execution engine.
+
+An average reduction of 9.31% in the total execution time is something nice to have, but not a dramatic improvement that could easily persuade one to switch to Hive-MR3. 
+After all, end users are usually concerned only with the wall-clock execution time of queries and not with efficiency in the implementation of the execution engine.
+Moreover it is practically impossible for Hive-MR3 in its current form to achieve a significantly higher reduction in the execution time 
+because Hive-MR3 shares the same runtime environment with Hive-on-Tez.
+The user experience, however, is radically different in multi-user environments in which many queries run concurrently while competing for resources. 
+In the [next article](/blog/2018-04-02-performance-evaluation-concurrent-tpcds), we will demonstrate the advantage offered by Hive-MR3 in a concurrent execution setting.
+

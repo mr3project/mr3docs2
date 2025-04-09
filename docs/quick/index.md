@@ -1,0 +1,21 @@
+---
+title: "Quick Start Guides"
+sidebar_position: 1
+---
+
+The quick start guides are designed to help the user get Hive on MR3 up and running
+with minimal effort.
+
+* [On a Local Machine](./local) demonstrates how to operate Hive on MR3 on a local machine. 
+* [On Hadoop](./hadoop) demonstrates how to operate Hive on MR3 in Hadoop clusters. 
+* [In Standalone Mode](./standalone) demonstrates how to operate Hive on MR3 in standalone mode.
+* [On Minikube](./minikube) demonstrates how to operate Hive on MR3 on Minikube.
+* [On Kubernetes](./k8s) demonstrates how to operate Hive on MR3 in Kubernetes clusters.
+
+Every page displays the complete list of commands for installing and testing Hive on MR3
+in a specific scenario, allowing the user to quickly try them in a compatible environment.
+
+:::info
+The first step common to all guides is installing Hive on MR3.
+Proceed to [Installing Hive on MR3](./install).
+:::

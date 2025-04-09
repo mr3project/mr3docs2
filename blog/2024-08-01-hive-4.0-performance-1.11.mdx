@@ -1,0 +1,155 @@
+---
+title: 'Performance Evaluation of Hive 4 on MR3 and Trino using the TPC-DS Benchmark'
+description: 'Performance Evaluation of Hive 4 on MR3 and Trino using the TPC-DS Benchmark'
+slug: 2024-08-01-hive-4.0-performance-1.11
+authors: [glapark]
+tags: [Hive 4, Hive, Trino, TPC-DS]
+hide_table_of_contents: false
+---
+
+## Introduction
+
+Recently Apache Hive 4 was released after a hiatus of several years.
+We have released [Hive 4 on MR3](https://github.com/mr3project/hive-mr3/tree/master4.0)
+which replaces Tez with MR3 as the default execution engine in Hive 4.
+
+<!-- truncate -->
+
+In this article, we evaluate the performance of Hive 4 on MR3 using the TPC-DS Benchmark.
+To compare Hive 4 on MR3 with competing technologies,
+we also evaluate the performance of the latest release of Trino.
+
+1. Hive 4.0.0 on MR3 1.11 (released on July 21, 2024)
+2. Trino 453 (released on July 25, 2024)
+
+Similarly to Tez and the core module of Spark,
+MR3 uses an execution framework generalizing the two-stage model of MapReduce.
+It represents computations as DAGs (Directed Acyclic Graphs)
+which describe how to produce map/reduce tasks to be fetched and executed in workers.
+In order to support fault tolerance, tasks may spill intermediate data on local disks.
+In contrast,
+Trino is an MPP system which does not exploit local disks
+and relies solely on in-memory storage to store intermediate data.
+As such, there has been a common misconception that
+Trino (or formerly Presto) runs much faster than Hive.
+
+Currently
+Trino promotes itself as a query engine that runs at **ludicrous** speed on [its website](https://trino.io/).
+This article demonstrates that Hive 4 on MR3 runs nearly at the same ludicrous speed,
+but unlike Trino,
+**without sacrificing fault tolerance** and **without compromising the correctness.**
+
+## Experiment Setup
+
+#### Cluster
+
+For the experiment,
+we use a cluster consisting of 1 master and 12 worker nodes with the following properties:
+
+* 2 x Intel(R) Xeon(R) E5-2640 v4 @ 2.40GHz
+* 256GB of memory 
+* 1 x 300GB HDD, 6 x 1TB SSDs
+* 10 Gigabit network connection
+
+In total, the amount of memory of worker nodes is
+12 * 256GB = 3072GB. 
+The cluster runs HDP (Hortonworks Data Platform) 3.1.4 and uses HDFS replication factor of 3. 
+
+#### TPC-DS benchmark
+
+We use a variant of the TPC-DS benchmark introduced in [the previous article](/blog/2019-06-26-correctness-hivemr3-presto-impala)
+which replaces an existing LIMIT clause with a new SELECT clause so that different results from the same query translate to different numbers of rows.
+The reader can find the set of modified TPC-DS queries in the [GitHub repository](https://github.com/mr3-project/benchmark/).
+
+The scale factor for the TPC-DS benchmark is 10TB.
+
+We generate datasets in ORC with Snappy compression.
+
+#### Configuration
+
+Both Hive 4 on MR3 and Trino use Java 22 (which is required by Trino 453).
+
+For Trino, we use a JVM option `-Xmx196G` and choose the following configuration
+after performance tuning:
+```
+memory.heap-headroom-per-node=58GB
+query.max-total-memory=1680GB
+query.max-memory-per-node=120GB
+query.max-memory=1440GB
+```
+
+For Hive 4 on MR3, we use the default configuration in the MR3 distribution
+except that
+we use a JVM option `-Xmx86G` for every worker and create two workers on each node.
+
+#### Test
+
+We sequentially submit 99 queries from the TPC-DS benchmark.
+We report the total running time, the geometric mean of running times,
+and the running time of each individual query.
+
+In order to check the correctness,
+we report the number of rows from each query.
+If the result contains a single row, we report the sum of all numerical values in it.
+
+## Raw data of the experiment results
+
+For the reader&apos;s perusal,
+we attach the table containing the raw data of the experiment results.
+Here is a link to [[Google Docs](https://docs.google.com/spreadsheets/d/1B0-rODt660li0IqyN8dSX9Pk514jiaHlAQtl5Tbz318/edit?usp=sharing)].
+<iframe 
+  src="https://docs.google.com/spreadsheets/d/1B0-rODt660li0IqyN8dSX9Pk514jiaHlAQtl5Tbz318/edit?usp=sharing?embedded=true"
+  width="100%" 
+  height="300px" 
+  style={{ border: "none" }}
+></iframe>
+
+## Analysis 
+
+#### #1. Correctness
+
+Both the systems successfully complete all the queries and agree on the results,
+except that
+**Trino returns wrong answers on query 23 and query 72.**
+
+* For each subquery of query 23, the correct answer contains a single row,
+but Trino returns an empty result (no row).
+* For query 72, we claim that the correct answer contains an empty result (no row)
+on the basis that both Hive and Spark return an empty result.
+(See [our previous article](./2019-11-07-sparksql2.3.2-0.10)
+for the result of running Spark.)
+Trino, however, returns 21137346 rows,
+which is the same result produced by Presto 317. 
+(See [our previous article](./2019-08-22-comparison-presto317-0.10)
+for the result of running Presto 317.)
+
+#### #2. Total running time
+
+In terms of the total running time,
+**Hive 4 on MR3 runs slightly faster than Trino.**
+
+* Trino finishes all the queries in 5798 seconds.
+* Hive 4 on MR3 finishes all the queries in 5744 seconds.
+
+![trino.hivemr3.total](/img/mr3.1.11/trino-hivemr3.1.11.total-fs8.png)
+
+#### #3. Response time
+
+In terms of the geometric mean of running times,
+**Trino responds about 15 percent faster than Hive 4 on MR3.**
+
+* On average, Trino finishes each query in 17.99 seconds.
+* On average, Hive 4 on MR3 finishes each query in 21.02 seconds.
+
+![trino.hivemr3.geo](/img/mr3.1.11/trino-hivemr3.1.11.geo-fs8.png)
+
+## Conclusion
+
+From the comparison with Trino 453,
+we conclude that 
+Hive 4 on MR3 is indeed a fast query engine suitable for modern computing environments.
+It is a practical data warehouse solution
+that significantly reduces the complexity of operating Apache Hive.
+For example, one can run Hive 4 on MR3 not only on Hadoop,
+but also on Kubernetes and even in standalone mode without requiring any resource manager.
+

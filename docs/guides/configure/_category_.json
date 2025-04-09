@@ -1,0 +1,10 @@
+{
+  "label": "Configuring Hive on MR3",
+  "position": 100,
+  "link": {
+    "slug": "guides/configure",
+    "type": "generated-index",
+    "description": "Reference for configuration keys of Hive on MR3"
+  }
+}
+

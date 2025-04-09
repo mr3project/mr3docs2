@@ -1,0 +1,10 @@
+{
+  "label": "User Interface",
+  "position": 15,
+  "link": {
+    "slug": "guides/ui",
+    "type": "generated-index",
+    "description": "User interface for Hive on MR3"
+  }
+}
+
