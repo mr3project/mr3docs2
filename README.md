@@ -1,3 +1,8 @@
+# MR3docs
+
+This is the git repository for MR3 documentation.
+Please visit [MR3docs](https://mr3docs.datamonad.com/) to see the website.
+
 # Website
 
 This website is built using [Docusaurus](https://docusaurus.io/), a modern static website generator.
