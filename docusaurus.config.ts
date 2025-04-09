@@ -40,7 +40,7 @@ const config: Config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/mr3project/mr3docs2/tree/main/packages/create-docusaurus/templates/shared/',
+            'https://github.com/mr3project/mr3docs2/tree/main/',
         },
         blog: {
           showReadingTime: true,
