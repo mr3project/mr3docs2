@@ -34,12 +34,12 @@ vi conf/tez-site.xml
 
 <property>
   <name>tez.shuffle-vertex-manager.auto-parallel.min.num.tasks</name>
-  <value>40</value>
+  <value>251</value>
 </property>
 
 <property>
   <name>tez.shuffle-vertex-manager.auto-parallel.max.reduction.percentage</name>
-  <value>10</value>
+  <value>20</value>
 </property>
 
 <property>
@@ -53,32 +53,37 @@ vi conf/tez-site.xml
 </property>
 ```
 
-* `tez.shuffle-vertex-manager.auto-parallel.min.num.tasks` = 40:
-Vertexes with at least 40 Tasks are considered for auto parallelism.
-* `tez.shuffle-vertex-manager.auto-parallel.max.reduction.percentage` = 10:
-The number of Tasks can be reduced by up to 100 - 10 = 90 percent,
-thereby leaving 10 percent of Tasks.
-For example, a Vertex of 100 Tasks in the beginning may end up with 10 Tasks
+* `tez.shuffle-vertex-manager.auto-parallel.min.num.tasks` = 251:
+Vertexes with at least 251 Tasks are considered for auto parallelism.
+* `tez.shuffle-vertex-manager.auto-parallel.max.reduction.percentage` = 20:
+The number of Tasks can be reduced by up to 100 - 20 = 80 percent,
+thereby leaving 20 percent of Tasks.
+For example, a Vertex of 100 Tasks in the beginning may end up with 20 Tasks
 when auto parallelism is used.
 * `tez.shuffle-vertex-manager.use-stats-auto-parallelism` = true:
 Vertexes analyze the statistics of output from upstream Tasks when applying auto parallelism.
-* `tez.shuffle.vertex.manager.auto.parallelism.min.percent` = 20:
-An input size of zero is normalized to 20 while the maximum input size is mapped to 100.
+* `tez.shuffle.vertex.manager.auto.parallelism.min.percent` = 10:
+When the statistics of output from upstream Tasks is considered,
+an input size of zero is normalized to 10 while the maximum input size is mapped to 100.
 
-Disabling auto parallelism usually reduces the response time of sequential queries.
+When sufficient resources are available,
+disabling auto parallelism sometimes improves the response time of sequential queries.
 In order to disable auto parallelism,
 set `tez.shuffle-vertex-manager.auto-parallel.min.num.tasks` in `tez-site.xml` to 
 a value larger than `hive.exec.reducers.max` in `hive-site.xml`.
 
+:::tip
+The default value of `tez.shuffle-vertex-manager.auto-parallel.max.reduction.percentage`
+in the MR3 release is 50, which is a reasonable choice for executing sequential queries.
+In a cluster where many queries are executed concurrently,
+a smaller value (e.g., 20) is recommended, as it usually results in higher throughput.
+:::
+
 :::caution
-Aggressive use of auto parallelism can increase the likelihood of fetch delays
-(and thus stragglers)
-if a single reducer is assigned too much data to fetch from upstream mappers.
-In such a case,
-the user can either disable auto parallelism completely
-or use auto parallelism less aggressively,
-e.g., by setting `tez.shuffle-vertex-manager.auto-parallel.max.reduction.percentage` to 50.
-The default value in the MR3 release is 50.
+Aggressive use of auto parallelism
+(e.g., setting `tez.shuffle-vertex-manager.auto-parallel.max.reduction.percentage` to 5)
+increases the likelihood of stragglers
+because a single reducer can be assigned too much data to fetch from upstream mappers.
 :::
 
 ## `hive.tez.llap.min.reducer.per.executor`
