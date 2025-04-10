@@ -16,7 +16,26 @@ A Kubernetes cluster created with Hive on MR3 consists of the following componen
 * MR3-UI and Grafana for visualization
 
 We assume some familiarity with key concepts in Kubernetes such as Pods, Containers, Volumes, ConfigMaps, and Secrets.
-Proceed to the following guides:
+
+## Prerequisites
+
+Running Hive on MR3 on Kubernetes has the following prerequisites:
+
+1. A running Kubernetes cluster is available.
+2. A database server for the Metastore database is running. 
+3. Either HDFS or S3 (or S3-compatible storage) is available for storing the warehouse. 
+For using S3, access credentials are required.
+4. The user can either create a PersistentVolume or store transient data on HDFS or S3.
+The PersistentVolume should be writable to 1) the user with UID 1000, and 2) user `nobody` (corresponding to root user) if Ranger is to be used for authorization.
+5. Every worker node has an identical set of local directories for storing intermediate data (to be mapped to hostPath volumes).
+These directories should be writable to the user with UID 1000 because all containers run as non-root user with UID 1000.
+6. The user can run Beeline (or any client program)
+to connect to HiveServer2 running at a given address.
+
+In our example, we use a MySQL server for the Metastore database,
+but PostgreSQL and MS SQL are also okay to use.
+
+Proceed to one of the following guides:
 
 * [Shell Scripts](./run-k8s)
   shows how to run Hive on MR3 on Kubernetes using executable shell scripts.
@@ -38,6 +57,11 @@ for running Hive on MR3.
 because all configuration parameters in the output YAML file
 are set consistently across all the components.
 There is no need to be familiar with TypeScript.
+:::
+
+:::tip
+We recommend that the user try Hive on MR3 [on Minikube](../minikube)
+before running it on Kubernetes.
 :::
 
 :::tip

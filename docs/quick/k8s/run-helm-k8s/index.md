@@ -10,29 +10,6 @@ By following the instructions, the user will learn:
 1. how to start Metastore
 2. how to run Hive on MR3
 
-:::tip
-We recommend that the user try Hive on MR3 [on Minikube](../../minikube)
-before running it on Kubernetes.
-:::
-
-## Prerequisites
-
-Running Hive on MR3 on Kubernetes has the following prerequisites:
-
-1. A running Kubernetes cluster is available, and the user should be able to execute command `helm` to use Helm.
-2. A database server for the Metastore database is running. 
-3. Either HDFS or S3 (or S3-compatible storage) is available for storing the warehouse. 
-For using S3, access credentials are required.
-4. The user can either create a PersistentVolume or store transient data on HDFS or S3.
-The PersistentVolume should be writable to 1) the user with UID 1000, and 2) user `nobody` (corresponding to root user) if Ranger is to be used for authorization.
-5. Every worker node has an identical set of local directories for storing intermediate data (to be mapped to hostPath volumes).
-These directories should be writable to the user with UID 1000 because all containers run as non-root user with UID 1000.
-6. The user can run Beeline (or any client program)
-to connect to HiveServer2 running at a given address.
-
-In our example, we use a MySQL server for the Metastore database,
-but PostgreSQL and MS SQL are also okay to use.
-
 [After installing Hive on MR3](../../install),
 change to the directory `helm`.
 
