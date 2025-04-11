@@ -107,7 +107,7 @@ const config: Config = {
           position: 'left',
           label: 'Release Notes',
         },
-        {to: '/blog', label: 'Blog', position: 'left'},
+        {to: '/blog', label: 'Blog', position: 'right'},
         {
           href: 'https://github.com/mr3project/mr3',
           label: 'GitHub',
@@ -143,12 +143,12 @@ const config: Config = {
           title: 'Community',
           items: [
             {
-              label: 'Google Group',
-              href: 'https://groups.google.com/g/hive-mr3',
-            },
-            {
               label: 'Slack',
               href: 'https://join.slack.com/t/mr3-help/shared_invite/zt-1wpqztk35-AN8JRDznTkvxFIjtvhmiNg',
+            },
+            {
+              label: 'Google Group',
+              href: 'https://groups.google.com/g/hive-mr3',
             },
           ],
         },
