@@ -20,8 +20,8 @@ function HomepageHeader() {
         <div className={styles.buttons}>
           <Link
             className="button button--secondary button--lg"
-            to="/docs/quick">
-            Deploy Hive on MR3 in 30 minutes ⏱️
+            to="https://github.com/mr3project/hive-mr3">
+            Git repository of Hive on MR3
           </Link>
         </div>
       </div>

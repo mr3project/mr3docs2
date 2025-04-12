@@ -17,5 +17,5 @@ in a specific scenario, allowing the user to quickly try them in a compatible en
 
 :::info
 The first step common to all guides is installing Hive on MR3.
-Proceed to [Installing Hive on MR3](./install).
+Proceed to [Installing Hive on MR3](/docs/quick/install).
 :::

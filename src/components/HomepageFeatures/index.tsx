@@ -14,17 +14,17 @@ type FeatureItem = {
 const FeatureList1: FeatureItem[] = [
   {
     title: 'Quick Start Guides',
-    link: './docs/quick',
+    link: './docs/quick/',
     Svg: require('@site/static/img/quickstartguide.svg').default,
     description: (
       <>
-        Run Hive on MR3 on Hadoop, on Kubernetes, or in standalone mode.
+        Deploy Hive on MR3 in 30 minutes ⏱️
       </>
     ),
   },
   {
     title: 'Features',
-    link: './docs/features',
+    link: './docs/features/',
     Svg: require('@site/static/img/features.svg').default,
     description: (
       <>
@@ -34,7 +34,7 @@ const FeatureList1: FeatureItem[] = [
   },
   {
     title: 'Operations Guides',
-    link: './docs/guides',
+    link: './docs/guides/',
     Svg: require('@site/static/img/operation.svg').default,
     description: (
       <>
@@ -47,7 +47,7 @@ const FeatureList1: FeatureItem[] = [
 const FeatureList2: FeatureItem[] = [
   {
     title: 'Blog',
-    link: '/blog',
+    link: '/blog/',
     Svg: require('@site/static/img/blog.svg').default,
     description: (
       <>
