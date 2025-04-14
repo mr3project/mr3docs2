@@ -114,7 +114,7 @@ HIVE_DATABASE_HOST=192.168.10.1       # use your IP address (where the MySQL dat
 
 ## Docker image
 
-We use a pre-built a pre-built Docker image available at [DockerHub](https://hub.docker.com/u/mr3project).
+We use a pre-built Docker image available at [DockerHub](https://hub.docker.com/u/mr3project).
 Open `env.sh` and set the following environment variables.
 
 * `DOCKER_HIVE_IMG` specifies the Docker image for MR3 DAGAppMaster Pod.
