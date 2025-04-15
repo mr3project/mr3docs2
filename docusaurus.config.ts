@@ -168,15 +168,6 @@ const config: Config = {
       ],
       copyright: `Copyright © ${new Date().getFullYear()} DataMonad. Built with Docusaurus.`,
     },
-    plugins: [
-      [
-        '@docusaurus/plugin-google-gtag',
-        {
-          trackingID: 'G-QLSYT8MQJL',
-          anonymizeIP: true,
-        },
-      ],
-    ],
     prism: {
       theme: prismThemes.github,
       darkTheme: prismThemes.dracula,
@@ -195,5 +186,16 @@ const config: Config = {
     },
   } satisfies Preset.ThemeConfig,
 };
+
+if (process.env.NODE_ENV === 'production') {
+  config.plugins = config.plugins || [];
+  config.plugins.push([
+    '@docusaurus/plugin-google-gtag',
+    {
+      trackingID: 'G-QLSYT8MQJL',
+      anonymizeIP: true,
+    },
+  ]);
+}
 
 export default config;
