@@ -10,7 +10,7 @@ By following the instructions, the user will learn:
 1. how to start Metastore
 2. how to run Hive on MR3
 
-[After installing Hive on MR3](../../install),
+After [installing Hive on MR3](../../install),
 change to the directory `helm`.
 
 ```sh

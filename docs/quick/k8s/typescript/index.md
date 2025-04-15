@@ -10,7 +10,7 @@ By following the instructions, the user will learn:
 
 * how to use TypeScript code to run Hive on MR3, along with MR3-UI, Grafana, Superset, and Spark on MR3.
 
-[After installing Hive on MR3](../../install),
+After [installing Hive on MR3](../../install),
 change to the directory `typescript`.
 
 ```sh

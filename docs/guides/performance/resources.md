@@ -74,6 +74,33 @@ spec:
   replicas: 2
 ```
 
+As each DAG consumes memory in DAGAppMaster,
+the amount of memory allocated to DAGAppMaster
+effectively determines how many DAGs can run concurrently.
+The user can control the maximum number of concurrent DAGs
+with the configuration key `mr3.am.max.num.concurrent.dags` in `mr3-site.xml`.
+
+```xml
+# terminal-command
+vi conf/mr3-site.xml
+
+<property>
+  <name>mr3.am.max.num.concurrent.dags</name>
+  <value>32</value>
+</property>
+```
+
+A simple DAG typically consumes less than 1GB of memory.
+For example, experiments show that allocating 32GB of memory to DAGAppMaster
+is sufficient to concurrently run 128 identical DAGs generated from query 18 of the TPC-DS benchmark.
+Complex queries, however, may generate DAGs that use significantly more memory,
+so it is important to monitor the memory usage of DAGAppMaster.
+
+:::tip
+Although MR3 DAGAppMaster is designed to recover from `OutOfMemoryError`,
+we recommend setting `mr3.am.max.num.concurrent.dags` conservatively.
+:::
+
 ## Resources for mappers, reducers, and ContainerWorkers
 
 The following configuration keys in `hive-site.xml` specify resources (in terms of memory in MB and number of cores) 

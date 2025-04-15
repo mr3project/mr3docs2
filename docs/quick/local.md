@@ -15,7 +15,7 @@ By following the instructions, the user will learn:
 4. how to create Beeline connections and send queries to HiveServer2
 5. difference between LocalThread mode and LocalProcess mode
 
-[After installing Hive on MR3](./install), change to the directory `hadoop`.
+After [installing Hive on MR3](./install), change to the directory `hadoop`.
 ```sh
 # terminal-command
 cd hadoop/

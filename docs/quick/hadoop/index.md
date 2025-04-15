@@ -25,7 +25,7 @@ In our example, the user `hive` executes Hive on MR3.
 * In order to use MySQL for the Metastore database,
 the user should have access to a MySQL server with all privileges.
 
-[After installing Hive on MR3](../install), change to the directory `hadoop`.
+After [installing Hive on MR3](../install), change to the directory `hadoop`.
 ```sh
 # terminal-command
 cd hadoop/

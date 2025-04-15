@@ -21,7 +21,7 @@ Running Hive on MR3 on Minikube has the following prerequisites:
 * A running Minikube cluster is available.
 * The user should be able to execute: 1) command `kubectl`; 2) command `helm`; 3) command `docker` if no MySQL database is available.
 
-[After installing Hive on MR3](../install),
+After [installing Hive on MR3](../install),
 change to the directory `helm`.
 
 ```sh

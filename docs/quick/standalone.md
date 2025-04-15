@@ -88,7 +88,7 @@ In our example, worker nodes use a single local directory `/data1/k8s`.
 
 ## Installing on worker nodes
 
-[After installing Hive on MR3](./install) on the master node,
+After [installing Hive on MR3](./install) on the master node,
 copy the entire directory to every worker node.
 In our example,
 we run Hive on MR3 as user `hive` and
