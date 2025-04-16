@@ -3,7 +3,7 @@ title: "On Hadoop"
 sidebar_position: 10
 ---
 
-The quick start guide for running Hive on MR3 [on Secure Hadoop](../../quick/hadoop/run-hadoop-kerberos)
+The quick start guide for running Hive on MR3 [on Secure Hadoop](/docs/quick/hadoop/run-hadoop-kerberos)
 includes instructions for using Kerberos authentication on Hadoop.
 This page provides additional details for reference.
 

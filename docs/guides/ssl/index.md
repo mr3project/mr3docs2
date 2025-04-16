@@ -43,7 +43,7 @@ unless otherwise noted.
 
 :::tip
 We recommend that the user try Hive on MR3 on Kubernetes
-[with SSL Encryption](../../quick/k8s/run-k8s/ssl).
+[with SSL Encryption](/docs/quick/k8s/run-k8s/ssl).
 :::
 
 * [Enabling SSL](./enable-ssl)

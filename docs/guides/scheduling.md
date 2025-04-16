@@ -4,7 +4,7 @@ sidebar_position: 12
 ---
 
 This page provides a guide on setting up a scheduling policy for Hive on MR3.
-See [DAG/Task Scheduling](../features/mr3/dag-scheduling) for an introduction.
+See [DAG/Task Scheduling](/docs/features/mr3/dag-scheduling) for an introduction.
 
 To meet the needs of a particular environment,
 the user may need to adjust the following configuration keys (all in `mr3-site.xml`).
@@ -59,7 +59,7 @@ If not, set `mr3.dag.queue.scheme` to `common` and follow these recommendations:
 It is best to enable capacity scheduling,
 with `mr3.dag.queue.scheme` set to `capacity`,
 where batch queries are routed to a Task queue with the lowest priority. 
-See [DAG/Task Scheduling](../features/mr3/dag-scheduling)
+See [DAG/Task Scheduling](/docs/features/mr3/dag-scheduling)
 for examples of setting `mr3.dag.queue.capacity.specs` (or `hive.mr3.dag.queue.capacity.specs`)
 to configure capacity scheduling.
 

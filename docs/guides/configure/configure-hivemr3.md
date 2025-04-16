@@ -21,7 +21,7 @@ Below we describe configuration keys relevant to Hive on MR3.
 |hive.mr3.dag.queue.name|default|Name of the Task queue for queries. Used with capacity scheduling in MR3. Corresponds to `mr3.dag.queue.name` in `mr3-site.xml` and can be set for individual queries.|
 |hive.mr3.dag.include.indeterminate.vertex|false|**true**: The DAG contains indeterminate Vertexes whose output can vary at each execution. Fault tolerance is not supported when fetch failures occur. **false**: The DAG contains no indeterminate Vertexes. Corresponds to `mr3.dag.include.indeterminate.vertex` in `mr3-site.xml` and can be set for individual queries. If set to true, set `hive.mr3.am.task.max.failed.attempts` to 1.|
 |hive.mr3.container.max.java.heap.fraction|0.8|Fraction of task memory to be used as Java heap. Fixed at the time of creating each MR3Session. Corresponds to `mr3.container.max.java.heap.fraction` in `mr3-site.xml`.|
-|hive.mr3.containergroup.scheme|all-in-one|ContainerGroup scheme: **all-in-one**, **per-map-reduce**, or **per-vertex**. For more details, see [ContainerGroup Scheme](../../features/hivemr3/containergroup-scheme).|
+|hive.mr3.containergroup.scheme|all-in-one|ContainerGroup scheme: **all-in-one**, **per-map-reduce**, or **per-vertex**. For more details, see [ContainerGroup Scheme](/docs/features/hivemr3/containergroup-scheme).|
 |hive.mr3.container.env||Environment string for ContainerGroups|
 |hive.mr3.container.java.opts||Java options for ContainerGroups. This key takes precedence over `MR3Conf.MR3_CONTAINER_LAUNCH_CMD_OPTS` (`mr3.container.launch.cmd-opts`) in `mr3-site.xml`.|
 |hive.mr3.container.stop.cross.dag.reuse|false|**true**: stop cross-DAG container reuse for ContainerGroups.  **false**: continue cross-DAG container reuse for ContainerGroups. Corresponds to `mr3.container.stop.cross.dag.reuse` in `mr3-site.xml` and can be set for individual queries.|
@@ -44,7 +44,7 @@ Below we describe configuration keys relevant to Hive on MR3.
 |hive.mr3.llap.orc.memory.per.thread.mb|1024|Memory in MB allocated to each ORC manager in low-level LLAP I/O threads|
 |hive.mr3.exec.inplace.progress|true|**true**: update execution progress in-place in the terminal.  **false**: do not update.|
 |hive.mr3.use.daemon.shufflehandler|0|Number of shuffle handlers in each ContainerWorker. Corresponds to `mr3.use.daemon.shufflehandler` in `mr3-site.xml`.|
-|hive.server2.mr3.share.session|false|**true**: run HiveServer2 in shared session mode.  **false**: run HiveServer2 in individual session mode. For more details, see [HiveServer2 Modes](../../features/hivemr3/hiveserver2).|
+|hive.server2.mr3.share.session|false|**true**: run HiveServer2 in shared session mode.  **false**: run HiveServer2 in individual session mode. For more details, see [HiveServer2 Modes](/docs/features/hivemr3/hiveserver2).|
 |hive.mr3.mapjoin.interrupt.check.interval|100000L|Interval (in terms of the number of entries) at which HashTableLoader checks the interrupt state|
 |hive.mr3.dag.additional.credentials.source||Comma-separated list of additional paths for obtaining credentials. If a query has no input files (e.g., when creating a fresh table or inserting values to an existing table), HDFS tokens may empty. In such a case, the user can provide additional paths for obtaining credentials so that the query can be executed with proper HDFS tokens.|
 |hive.mr3.localize.session.jars|true|**true**: localize `hive-exec.jar` as a local resource.  **false**: do not localize `hive-exec.jar` (for Hive on Kubernetes).|

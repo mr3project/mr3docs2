@@ -5,7 +5,7 @@ sidebar_position: 2
 
 ## Enabling high availability for HiveServer2
 
-In order to enable [high availability for HiveServer2](../../features/hivemr3/high-availability),
+In order to enable [high availability for HiveServer2](/docs/features/hivemr3/high-availability),
 the user should take the following two steps:
 
 * set the environment variable `MR3_SHARED_SESSION_ID` in `env.sh`

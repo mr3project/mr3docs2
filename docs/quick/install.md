@@ -46,6 +46,8 @@ except when running Hive on MR3 on Kubernetes.
 :::caution
 The MR3 release has **a worker capacity limit of 512GB.**
 For example, the user can create up to 8 workers, each with 64GB of memory.
-For larger deployments, a commercial license is available.
+
+**For larger deployments, a commercial license is available.
+See [Pricing & FAQ](https://datamonad.com/pricing/) for more information.**
 :::
 

@@ -8,7 +8,7 @@ In our example, we assume a MySQL database for Ranger.
 
 :::tip
 We recommend the user try the quick start guide for running Hive on MR3 on Kubernetes
-[with Ranger](../../quick/k8s/run-k8s/ranger).
+[with Ranger](/docs/quick/k8s/run-k8s/ranger).
 :::
 
 ## Configuring Ranger Pod

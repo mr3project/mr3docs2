@@ -4,7 +4,7 @@ sidebar_position: 60
 ---
 
 This section explains how to run Hive on MR3 with Celeborn for remote shuffle service.
-See [Remote Shuffle Service](../features/mr3/celeborn) for an introduction.
+See [Remote Shuffle Service](/docs/features/mr3/celeborn) for an introduction.
 
 ## Configuring MR3 with Celeborn
 
@@ -94,7 +94,7 @@ Here are a few comments on operating MR3 with Celeborn.
 * Despite the use of pipelined shuffling (for both ordered and unordered edges),
 speculative execution works okay with Celeborn
 (because we set `mr3.dag.route.event.after.source.vertex` to true)
-and can be effective in [eliminating fetch delays](../features/mr3/fetchdelay).
+and can be effective in [eliminating fetch delays](/docs/features/mr3/fetchdelay).
 * When using Celeborn, 
 **it is safe to 
 set `hive.mr3.delete.vertex.local.directory` to true in `hive-site.xml`**
@@ -106,14 +106,14 @@ including `OutOfMemoryError` in the value of `mr3.am.task.no.retry.errors`
 is not recommended
 because re-executing a query is likely to end up with the same `OutOfMemoryError`.
 In such a case, try to use a smaller value of `tez.runtime.shuffle.total.parallel.copies`.
-* [Auto parallelism](../features/hivemr3/auto-parallelism) works okay with Celeborn,
+* [Auto parallelism](/docs/features/hivemr3/auto-parallelism) works okay with Celeborn,
 but the optimization of shuffling for auto parallelism is irrelevant to Celeborn.
 
 ## Fault tolerance
 
 From Celeborn 0.5.1,
 MR3 supports fault tolerance
-using [Task/Vertex reruns](../features/mr3/fault-tolerance/#implementing-taskvertex-reruns).
+using [Task/Vertex reruns](/docs/features/mr3/fault-tolerance/#implementing-taskvertex-reruns).
 Thus it is safe to disable data replication when configuring Celeborn.
 (Before Celeborn 0.5.1,
 MR3 requires data replication by Celeborn in order to support fault tolerance.)

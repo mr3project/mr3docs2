@@ -7,7 +7,7 @@ This page explains additional steps for
 using SSL (Secure Sockets Layer) encryption in Hive on MR3.
 For simplicity,
 secure connection to database servers for Metastore and Ranger is not enabled.
-See [SSL Encryption](../../../guides/ssl/) for details.
+See [SSL Encryption](/docs/guides/ssl/) for details.
 
 ## basicsEnv: basics.T
 

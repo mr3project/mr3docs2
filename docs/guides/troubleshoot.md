@@ -79,7 +79,7 @@ An example of `FileAlreadyExistsException` is:
 Caused by: org.apache.hadoop.fs.FileAlreadyExistsException: Failed to rename s3a://hivemr3/warehouse/tpcds_bin_partitioned_orc_1000.db/.hive-staging_hive_2023-05-17_07-37-59_392_7290354321306036074-2/-ext-10002/000000_0/delta_0000001_0000001_0000/bucket_00000 to s3a://hivemr3/warehouse/tpcds_bin_partitioned_orc_1000.db/web_site/delta_0000001_0000001_0000/bucket_00000; destination file exists
 ```
 
-This usually happens when [speculative execution](../features/mr3/speculative) is enabled.
+This usually happens when [speculative execution](/docs/features/mr3/speculative) is enabled.
 The user can disable speculative execution by setting the configuration key `hive.mr3.am.task.concurrent.run.threshold.percent` to 100 in `hive-site.xml`.
 
 ### A query accessing S3 fails with `SdkClientException: Unable to execute HTTP request: Timeout waiting for connection from pool`.

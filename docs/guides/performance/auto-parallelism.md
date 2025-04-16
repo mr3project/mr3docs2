@@ -5,7 +5,7 @@ sidebar_position: 5
 
 ## Enabling auto parallelism
 
-To enable [auto parallelism](../../features/hivemr3/auto-parallelism),
+To enable [auto parallelism](/docs/features/hivemr3/auto-parallelism),
 the user should set
 `hive.tez.auto.reducer.parallelism` to true in `hive-site.xml`
 and `tez.shuffle-vertex-manager.enable.auto-parallel` to true in `tez-site.xml`.

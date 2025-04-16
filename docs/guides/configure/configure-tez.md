@@ -16,7 +16,7 @@ Below we describe such configuration keys.
 |**Name**|**Default value**|Description|
 |--------|:----------------|:----------|
 |tez.runtime.pipelined.sorter.use.soft.reference|false|**true**: use soft references for ByteBuffers allocated in PipelinedSorter. These soft references are reused across TaskAttempts running in the same ContainerWorker.  **false**: do not use soft references.| 
-|tez.shuffle-vertex-manager.enable.auto-parallel|false|**true**: enable auto parallelism for ShuffleVertexManager.  **false**: disable auto parallelism. For more details, see [Auto Parallelism](../../features/hivemr3/auto-parallelism).|
+|tez.shuffle-vertex-manager.enable.auto-parallel|false|**true**: enable auto parallelism for ShuffleVertexManager.  **false**: disable auto parallelism. For more details, see [Auto Parallelism](/docs/features/hivemr3/auto-parallelism).|
 |tez.shuffle-vertex-manager.auto-parallel.min.num.tasks|20|Minimum number of Tasks to trigger auto parallelism. For example, if the value is set to 20, only those Vertexes with at least 20 Tasks are considered for auto parallelism. The user can effectively disable auto parallelism by setting this configuration key to a large value.|
 |tez.shuffle-vertex-manager.auto-parallel.max.reduction.percentage|10|Percentage of Tasks that can be kept after applying auto parallelism. For example, if the value is set to 10, the number of Tasks can be reduced by up to 100 - 10 = 90 percent, thereby leaving 10 percent of Tasks.|
 |tez.shuffle-vertex-manager.use-stats-auto-parallelism|false|**true**: analyze input statistics when applying auto parallelism.  **false**: do not use input statistics.|
@@ -30,7 +30,7 @@ Below we describe such configuration keys.
 |tez.am.shuffle.auxiliary-service.id|mapreduce_shuffle|Service ID for the external shuffle service. Set to `tez_shuffle` to use MR3 shuffle handlers.|
 |tez.shuffle.max.threads|0|Number of threads in each shuffle handler. With the default value of zero, each shuffle handler creates twice as many threads as the number of cores.|
 |tez.shuffle.port|13563|Default port number for the shuffle handler of MR3|
-|tez.runtime.shuffle.connect.timeout|12500|Maximum time in milliseconds for trying to connect to the shuffle service or the built-in shuffle handler before reporting fetch-failures. For more details, see [Fault Tolerance](../../features/mr3/fault-tolerance).|
+|tez.runtime.shuffle.connect.timeout|12500|Maximum time in milliseconds for trying to connect to the shuffle service or the built-in shuffle handler before reporting fetch-failures. For more details, see [Fault Tolerance](/docs/features/mr3/fault-tolerance).|
 |tez.shuffle.indexcache.mb|10|Size of path index cache in MB for MR3 shuffle handlers.|
 |tez.shuffle.indexcache.share|true|**true**: All MR3 shuffle handlers share path index cache. **false**: Each MR3 shuffle handler uses its own path index cache. Set to false only when the number of shuffle handlers is very large.|
 |tez.runtime.use.free.memory.fetched.input|false|**true**: If the size of free memory exceeds the size of memory allocated to a single Task, fetchers use MemoryFetchedInput (for unordered data) and InMemoryMapOutput and (for ordered data) instead of spilling to local disks. **false**: Fetchers do not consider the size of free memory.|

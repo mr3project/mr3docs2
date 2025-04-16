@@ -8,7 +8,7 @@ This section provides additional guides on operating Hive on MR3 on Kubernetes.
 :::info
 We assume that the user has followed the instructions
 in the quick start guide for running Hive on MR3 on Kubernetes
-using [Shell Scripts](../../quick/k8s/run-k8s/).
+using [Shell Scripts](/docs/quick/k8s/run-k8s/).
 This section, however, can be readily adapted for Helm and TypeScript.
 :::
 

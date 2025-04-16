@@ -4,7 +4,7 @@ sidebar_position: 20
 ---
 
 The quick start guide for running Hive on MR3 on Kubernetes
-[with Kerberos](../../quick/k8s/run-k8s/kerberos)
+[with Kerberos](/docs/quick/k8s/run-k8s/kerberos)
 includes instructions for using Kerberos authentication on Kubernetes.
 This page provides additional details for reference.
 

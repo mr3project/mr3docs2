@@ -484,7 +484,7 @@ vi conf/core-site.xml
 
 The user may need to change the parameters for accessing S3
 to avoid `SdkClientException: Unable to execute HTTP request: Timeout waiting for connection from pool`.
-For more details, see [Troubleshooting](../guides/troubleshoot).
+For more details, see [Troubleshooting](/docs/guides/troubleshoot).
 
 When using
 the class `EnvironmentVariableCredentialsProvider` to read AWS credentials,

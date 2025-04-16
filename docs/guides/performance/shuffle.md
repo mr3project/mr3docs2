@@ -15,7 +15,7 @@ by managing fetch requests **from remote ContainerWorkers**.
 ## Configuring ShuffleServer
 
 Hive on MR3 centralizes the management of all fetchers under a common ShuffleServer
-(see [Managing Fetchers](../../features/mr3/shuffleserver)).
+(see [Managing Fetchers](/docs/features/mr3/shuffleserver)).
 
 ![mr3.tez.shuffle.new](/mr3/mr3.tez.shuffle.new-fs8.png)
 
@@ -110,7 +110,7 @@ Note, however, that a query may fail if it generates large intermediate files (e
 
 ## Configuring kernel parameters
 
-A common solution to reduce the chance of [fetch delays](../../features/mr3/fetchdelay) is to adjust a few kernel parameters to prevent packet drops.
+A common solution to reduce the chance of [fetch delays](/docs/features/mr3/fetchdelay) is to adjust a few kernel parameters to prevent packet drops.
 For example, the user can adjust the following kernel parameters on every node in the cluster:
 
 * increase the value of `net.core.somaxconn` (e.g., from the default value of 128 to 16384)
@@ -150,8 +150,8 @@ ethtool -K p1p1 sg off
 
 If fetch delays occur frequently,
 the user can try two features of MR3:
-[running multiple shuffle handlers in a ContainerWorker](../../features/mr3/shufflehandler)
-and [speculative execution](../../features/mr3/speculative).
+[running multiple shuffle handlers in a ContainerWorker](/docs/features/mr3/shufflehandler)
+and [speculative execution](/docs/features/mr3/speculative).
 
 :::tip
 To check for fetch delays,
@@ -288,7 +288,7 @@ do not use pipelined shuffling for long-running batch queries.
 The configuration key `tez.runtime.shuffle.connect.timeout` specifies
 the maximum time (in milliseconds) for trying to connect to an external shuffle service
 or built-in shuffle handlers before reporting fetch-failures.
-(See [Fault Tolerance](../../features/mr3/fault-tolerance/) for a few examples.)
+(See [Fault Tolerance](/docs/features/mr3/fault-tolerance/) for a few examples.)
 With the default value of 12500,
 a TaskAttempt retries up to twice following the first attempt, each after waiting for 5 seconds. 
 
@@ -309,7 +309,7 @@ triggers Task/Vertex reruns reasonably fast.
 Depending on resources allocated to each mapper, reducer, and ContainerWorker,
 it may help to run shuffle handlers in a separate process inside the ContainerWorker Pod.
 For more details,
-see [MR3 Shuffle Handler](../../features/mr3/shufflehandler).
+see [MR3 Shuffle Handler](/docs/features/mr3/shufflehandler).
 
 In order to run shuffle handlers in a separate process,
 the user should set three configuration keys in `mr3-site.xml`.

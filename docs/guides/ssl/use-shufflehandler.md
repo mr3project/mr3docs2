@@ -4,7 +4,7 @@ sidebar_position: 30
 ---
 
 This page explains how to use the MR3 shuffle handler with SSL enabled.
-For introduction, see [MR3 Shuffle Handler](../../features/mr3/shufflehandler).
+For introduction, see [MR3 Shuffle Handler](/docs/features/mr3/shufflehandler).
 
 In comparison with Hadoop/MapReduce shuffle service,
 enabling secure shuffle in MR3 is much simpler

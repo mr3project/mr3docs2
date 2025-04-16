@@ -24,7 +24,7 @@ Below we describe all configuration keys for MR3 which are divided into 12 secti
 |**Name**|**Default value**|Description|
 |--------|:----------------|:----------|
 |mr3.runtime|tez|**tez**: use Tez 0.9.1 runtime. **spark**: use Spark runtime.|
-|mr3.master.mode|yarn|**local-thread**: DAGAppMaster starts as a new thread inside MR3Client.  **local-process**: DAGAppMaster starts as a new process on the same machine where MR3Client is running.  **yarn**: DAGAppMaster starts as a new container in the Hadoop cluster.  **kubernetes**: DAGAppMaster starts as a Pod in the Kubernetes cluster. For more details, see [DAGAppMaster and ContainerWorker Modes](../../features/mr3/master-worker-mode).|
+|mr3.master.mode|yarn|**local-thread**: DAGAppMaster starts as a new thread inside MR3Client.  **local-process**: DAGAppMaster starts as a new process on the same machine where MR3Client is running.  **yarn**: DAGAppMaster starts as a new container in the Hadoop cluster.  **kubernetes**: DAGAppMaster starts as a Pod in the Kubernetes cluster. For more details, see [DAGAppMaster and ContainerWorker Modes](/docs/features/mr3/master-worker-mode).|
 |mr3.am.acls.enabled|true|**true**: enable ACLs for DAGAppMaster and DAGs.  **false**: disable ACLS for DAGAppMaster and DAGs.|
 |mr3.cluster.additional.classpath||Additional classpath for DAGAppMaster and ContainerWorkers|
 |mr3.cluster.use.hadoop-libs|false|**true**: include the classpath defined in `YarnConfiguration.YARN_APPLICATION_CLASSPATH`.  **false**: do not include the classpath defined in `YarnConfiguration.YARN_APPLICATION_CLASSPATH`.|
@@ -54,7 +54,7 @@ Below we describe all configuration keys for MR3 which are divided into 12 secti
 |mr3.am.local.log-dir|`/tmp/${user.name}/mr3/log-dir`|Logging directory for DAGAppMaster running in LocalThread or LocalProcess mode|
 |mr3.cancel.delegation.tokens.on.completion|true|**true**: cancel delegation tokens when the MR3 job completes.  **false**: do not cancel delegation tokens.|
 |mr3.dag.status.pollinterval.ms|1000|Time interval in milliseconds for retrieving the status of running DAGs|
-|mr3.am.session.mode|false|**true**: create MR3 SessionClient.  **false**: create MR3 JobClient. For more details, see [MR3Client](../../features/mr3/client).|
+|mr3.am.session.mode|false|**true**: create MR3 SessionClient.  **false**: create MR3 JobClient. For more details, see [MR3Client](/docs/features/mr3/client).|
 |mr3.am.session.share.dag.client.rpc|true|For MR3 SessionClient only.  **true**: all DAGClients share a common DAGClientRPC object.  **false**: each DAGClient creates its own DAGClientRPC object.|
 |mr3.session.client.timeout.secs|120|Time in seconds for terminating MR3 SessionClient with a timeout|
 
@@ -68,7 +68,7 @@ Below we describe all configuration keys for MR3 which are divided into 12 secti
 |**Name**|**Default value**|Description|
 |--------|:----------------|:----------|
 |mr3.yarn.priority|0|Priority of the MR3 Yarn application|
-|mr3.am.worker.mode|local|Type of the resource scheduler created in DAGAppMaster. The actual type of ContainerWorkers is specified by `mr3.container.resourcescheduler.type` for each ContainerGroup. **local**: ContainerWorkers start as threads inside DAGAppMaster.  **yarn**: ContainerWorkers start as containers in a Hadoop cluster.  **kubernetes**: ContainerWorkers start as Pods in a Kubernetes cluster.  **process**: ContainerWorkers executed by users contact DAGAppMaster. For more details, see [DAGAppMaster and ContainerWorker Modes](../../features/mr3/master-worker-mode).|
+|mr3.am.worker.mode|local|Type of the resource scheduler created in DAGAppMaster. The actual type of ContainerWorkers is specified by `mr3.container.resourcescheduler.type` for each ContainerGroup. **local**: ContainerWorkers start as threads inside DAGAppMaster.  **yarn**: ContainerWorkers start as containers in a Hadoop cluster.  **kubernetes**: ContainerWorkers start as Pods in a Kubernetes cluster.  **process**: ContainerWorkers executed by users contact DAGAppMaster. For more details, see [DAGAppMaster and ContainerWorker Modes](/docs/features/mr3/master-worker-mode).|
 |mr3.am.max.num.concurrent.dags|128|Max number of DAGs that can run concurrently in DAGAppMaster|
 |mr3.am.shutdown.rightaway|true|**true**: DAGAppMaster does not wait until MR3Client retrieves the final states of all DAGs.  **false**: DAGAppMaster waits until MR3Client retrieves the final states of all DAGs.|
 |mr3.am.shutdown.sleep.max.ms|5000|Time in milliseconds to wait until MR3Client retrieves the final states of all DAGs|
@@ -85,7 +85,7 @@ Below we describe all configuration keys for MR3 which are divided into 12 secti
 |mr3.container.heartbeat.timeout.check.ms|15000|Time interval in milliseconds for checking heartbeat timeout for ContainerWorkers|
 |mr3.dag.timeout.kill.check.ms|15000|Time interval in milliseconds for checking DAG timeout|
 |mr3.container.idle.timeout.ms|300000|Time in milliseconds for triggering timeout for idle ContainerWorkers|
-|mr3.am.node-blacklisting.enabled|false|**true**: enable node blacklisting.  **false**: disable node blacklisting. For more details, see [Node Blacklisting](../../features/mr3/blacklisting).|
+|mr3.am.node-blacklisting.enabled|false|**true**: enable node blacklisting.  **false**: disable node blacklisting. For more details, see [Node Blacklisting](/docs/features/mr3/blacklisting).|
 |mr3.am.maxtaskfailure.percent|5|Percentage of TaskAttempt failures that triggers node blacklisting|
 |mr3.am.max.safe.resource.percent.blacklisted|50|Max percentage of resource to be allocated to a node that is blacklisted|
 |mr3.am.min.safe.resource.percent.blacklisted|10|Min percentage of resource to be allocated to a node that is blacklisted|
@@ -136,13 +136,13 @@ Below we describe all configuration keys for MR3 which are divided into 12 secti
 |--------|:----------------|:----------|
 |mr3.am.min.cluster.resource.memory.mb|102400|Min size of memory in MB that DAGAppMaster assumes as the cluster resource when initializing Map Tasks. Can be set for individual DAGs.|
 |mr3.am.min.cluster.resource.cpu.cores|100|Min number of cores that DAGAppMaster assumes as the cluster resource when initializing Map Tasks. Can be set for individual DAGs.|
-|mr3.am.task.max.failed.attempts|3|Max number of TaskAttempts to create for Task. Must be greater than zero. Can be set for individual DAGs. For more details, see [Fault Tolerance](../../features/mr3/fault-tolerance).|
-|mr3.am.task.no.retry.errors||Comma-separated list of names of Exceptions and Errors that prevent the re-execution of Tasks. Can be set for individual DAGs. For more details, see [Fault Tolerance](../../features/mr3/fault-tolerance).|
-|mr3.am.task.retry.on.fatal.error|false|**true**: retry even if TaskAttempts fail with fatal errors.  **false**: do not retry if TaskAttempts fail with fatal errors. Can be set for individual DAGs. For more details, see [Fault Tolerance](../../features/mr3/fault-tolerance).|
+|mr3.am.task.max.failed.attempts|3|Max number of TaskAttempts to create for Task. Must be greater than zero. Can be set for individual DAGs. For more details, see [Fault Tolerance](/docs/features/mr3/fault-tolerance).|
+|mr3.am.task.no.retry.errors||Comma-separated list of names of Exceptions and Errors that prevent the re-execution of Tasks. Can be set for individual DAGs. For more details, see [Fault Tolerance](/docs/features/mr3/fault-tolerance).|
+|mr3.am.task.retry.on.fatal.error|false|**true**: retry even if TaskAttempts fail with fatal errors.  **false**: do not retry if TaskAttempts fail with fatal errors. Can be set for individual DAGs. For more details, see [Fault Tolerance](/docs/features/mr3/fault-tolerance).|
 |mr3.am.notify.destination.vertex.complete|false|**true**: notify ContainerWorker of the completion of all destination Vertexes so that it can delete the directory for intermediate data of the source Vertex.  **false**: do not notify. Can be set for individual DAGs.|
 |mr3.am.commit-all-outputs-on-dag-success|true|**true**: commit the output of all Vertexes when DAG completes successfully.  **false**: commit the output when Vertex completes successfully. Can be set for individual DAGs.|
 |mr3.am.permit.custom.user.class|false|**true**: allow custom classes for VertexManager, InputInitializer, OutputCommitter.  **false**: do not allow custom classes. Can be set for individual DAGs.|
-|mr3.am.task.concurrent.run.threshold.percent|100|Percentage of Tasks that complete before starting speculative execution. Can be set to an integer between 1 and 100. If set to 100, speculative execution of TaskAttempts is disabled. Can be set for individual DAGs. For more details, see [Speculative Execution](../../features/mr3/speculative).|
+|mr3.am.task.concurrent.run.threshold.percent|100|Percentage of Tasks that complete before starting speculative execution. Can be set to an integer between 1 and 100. If set to 100, speculative execution of TaskAttempts is disabled. Can be set for individual DAGs. For more details, see [Speculative Execution](/docs/features/mr3/speculative).|
 |mr3.am.task.concurrent.run.min.threshold.ms|10000|Minimum of the maximum execution time (in milliseconds) of Tasks that complete before starting speculative execution. For example, a value of 10000 means that if all Tasks complete within 10 seconds before starting speculative execution, we use 10 seconds as their maximum execution time. Can be set for individual DAGs.|
 |mr3.am.task.concurrent.run.multiplier|2.0d|Multiplier of the maximum execution time of Tasks that complete before starting speculative execution. Can be set for individual DAGs.|
 |mr3.am.task.concurrent.run.enable.root.vertex|false|**true**: Speculative execution is effective on root Vertexes with no ancestors.  **false**: Speculative execution is not effective on root Vertexes.|
@@ -160,7 +160,7 @@ Below we describe all configuration keys for MR3 which are divided into 12 secti
 |mr3.container.get.command.interval.ms|2000|Time interval in milliseconds for retrieving commands in ContainerWorkers that are currently serving TaskAttempts|
 |mr3.container.busy.wait.interval.ms|100|Time interval in milliseconds for retrieving commands in idle ContainerWorkers|
 |mr3.task.am.heartbeat.interval.ms|250|Time interval in milliseconds for sending heartbeats from TaskAttempts|
-|mr3.task.am.heartbeat.duration.interval.ms|15000|Time interval in milliseconds for sending heartbeats from TaskAttempts. It also determines the granularity of updating the duration of TaskAttempts in speculative execution. For more details, see [Speculative Execution](../../features/mr3/speculative).|
+|mr3.task.am.heartbeat.duration.interval.ms|15000|Time interval in milliseconds for sending heartbeats from TaskAttempts. It also determines the granularity of updating the duration of TaskAttempts in speculative execution. For more details, see [Speculative Execution](/docs/features/mr3/speculative).|
 |mr3.task.am.heartbeat.counter.interval.ms|60000|Time interval in milliseconds for sending counters in heartbeats from TaskAttempts|
 |mr3.task.max.events.per.heartbeat|500|Max number of task events to include in a heartbeat reply|
 |mr3.container.thread.keep.alive.time.ms|4000|Time in milliseconds for keeping threads serving TaskAttempts in ContainerWorkers|
@@ -187,7 +187,7 @@ Below we describe all configuration keys for MR3 which are divided into 12 secti
 |--------|:----------------|:----------|
 |mr3.memory.usage.check.scheme|average|**average**: calculate the average memory usage of the current window.  **maximum**: calculate the maximum memory usage of the current window.|
 |mr3.memory.usage.check.window.length.secs|600|Window length in seconds for calculating memory usage|
-|mr3.check.memory.usage.event.interval.secs|10|Time interval in seconds for 1) generating events for calculating memory usage for autoscaling and 2) updating the number of ContainerWorkers belonging to each ContainerGroup under fair scheduling when [recycling ContainerWorkers](../../features/mr3/recycle-worker)|
+|mr3.check.memory.usage.event.interval.secs|10|Time interval in seconds for 1) generating events for calculating memory usage for autoscaling and 2) updating the number of ContainerWorkers belonging to each ContainerGroup under fair scheduling when [recycling ContainerWorkers](/docs/features/mr3/recycle-worker)|
 |mr3.enable.auto.scaling|false|**true**: enable autoscaling.  **false**: disable autoscaling.|
 |mr3.auto.scale.out.threshold.percent|80|Minimum percentage of memory usage to trigger scale-out|
 |mr3.auto.scale.in.threshold.percent|50|Maximum percentage of memory usage to trigger scale-in|

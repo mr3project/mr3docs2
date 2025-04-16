@@ -9,7 +9,7 @@ with MR3-UI.
 
 :::tip
 We recommend that the user try the quick start guide for running Hive on MR3 on Kubernetes
-[with MR3-UI and Grafana](../../quick/k8s/run-k8s/timeline).
+[with MR3-UI and Grafana](/docs/quick/k8s/run-k8s/timeline).
 :::
 
 ## Configuring Timeline Server Pod
