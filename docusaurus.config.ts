@@ -171,7 +171,7 @@ const config: Config = {
     prism: {
       theme: prismThemes.github,
       darkTheme: prismThemes.dracula,
-      additionalLanguages: ['yaml', 'typescript'],
+      additionalLanguages: ['yaml', 'typescript', 'diff'],
       magicComments: [
         {
           className: 'theme-code-block-highlighted-line',

@@ -285,6 +285,12 @@ vi hive/conf/hive-site.xml
 </property>
 ```
 
+:::info
+* Update `hive.repl.rootdir` only if the user plans to execute the `REPL DUMP` command.
+* Do not update `hive.downloaded.resources.dir`
+because it should point to a directory on the local file system.
+:::
+
 ## Configuring S3 (optional)
 
 To access S3 storage,

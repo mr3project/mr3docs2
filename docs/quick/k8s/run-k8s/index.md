@@ -324,6 +324,12 @@ vi conf/hive-site.xml
 </property>
 ```
 
+:::info
+* Update `hive.repl.rootdir` only if the user plans to execute the `REPL DUMP` command.
+* Do not update `hive.downloaded.resources.dir`
+because it should point to a directory on the local file system.
+:::
+
 Open `env.sh` and update the following two environment variables to empty values
 because we do not use PersistentVolumes.
 Set `METASTORE_USE_PERSISTENT_VOLUME` to false as well.

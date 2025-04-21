@@ -1,0 +1,443 @@
+---
+title: 'Performance Evaluation of Trino 468, Spark 4.0.0-RC2, and Hive 4 on MR3 2.0 using the TPC-DS Benchmark'
+description: 'Performance Evaluation of Trino 468, Spark 4.0.0-RC2, and Hive 4 on MR3 2.0 using the TPC-DS Benchmark'
+slug: 2025-04-18-performance-evaluation-2.0
+authors: [glapark]
+tags: [Hive 4, Hive, Trino, Spark, Tez, TPC-DS]
+hide_table_of_contents: false
+---
+
+In this article, we report the results of evaluating the performance of the following systems
+using the 10TB TPC-DS Benchmark.
+
+1. Trino 468 (released in December 2024)
+2. Spark 4.0.0-RC2 (released in March 2025)
+3. Hive 4.0.0 on Tez (built in February 2025)
+4. Hive 4.0.0 on MR3 2.0 (released in April 2025)
+
+Trino is an MPP-style query engine and is not fault-tolerant.
+The other three systems are fully fault-tolerant.
+
+<!-- truncate -->
+
+## Introduction
+
+**Trino** is a powerful distributed SQL engine
+known for its ability to query everything from object stores to relational databases.
+Its design emphasizes low-latency response times,
+making it well-suited for interactive analytics at scale.
+On its official website,
+Trino proudly claims to **run at ludicrous speed**
+— a phrase that captures both its technical ambition and its playful confidence.
+
+**Apache Spark**
+is a widely used distributed computing engine designed for large-scale data processing. 
+Spark is built for speed and ease of use,
+supporting diverse workloads within a unified framework and
+proving itself battle-tested across industries.
+Its versatility has earned it a fitting reputation:
+Spark is the **Swiss Army knife** of the data world.
+
+**Apache Hive** can be compared to **the tortoise of the data race** — not the fastest query engine,
+but one that consistently completes workloads with reliability.
+It is known for its ability to handle massive datasets with strong fault tolerance,
+making it a dependable choice for large-scale ETL.
+The recent release of Hive 4 reflects its ongoing evolution,
+bringing notable improvements in performance and features.
+
+With these systems in mind,
+we set out to compare their performance using the industry-standard TPC-DS benchmark.
+Alongside the more familiar systems, we also include **Hive on MR3**
+— a variant of Apache Hive that replaces Tez with MR3 as the execution engine.
+Designed to support both batch and interactive processing within a unified framework,
+Hive on MR3 is a relatively new alternative that is worth evaluating in a comparative setting.
+
+The outcome may not align with common expectations.
+Some results, in fact, may come as a surprise.
+Let the race begin!
+
+## Experiment Setup
+
+### Cluster
+
+For the experiment,
+we use a cluster consisting of 1 master and 12 worker nodes with the following properties:
+
+* 2 x Intel(R) Xeon(R) E5-2640 v4 @ 2.40GHz
+* 256GB of memory 
+* 1 x 300GB HDD, 6 x 1TB SSDs
+* 10 Gigabit network connection
+
+In total, the amount of memory of worker nodes is 12 * 256GB = 3072GB. 
+The cluster runs Hadoop 3.1 and uses an HDFS replication factor of 3. 
+
+### TPC-DS benchmark
+
+We use 99 queries from the original TPC-DS benchmark (generated with seed 1819994127).
+Each system uses queries adjusted for its SQL syntax,
+including differences in interval expressions and identifier quoting.
+Additionally we apply the following changes.
+
+* Trino only. For query 21, 
+we use a double division instead of an integer division.
+
+```diff
+    where (case when inv_before > 0
+-               then inv_after / inv_before
++               then cast(inv_after as double) / inv_before
+                else null
+                end) between 2.0/3.0 and 3.0/2.0
+```
+
+* For query 72, we replace arithmetic on date values with a call to `date_add()`
+to comply with SQL rules for date manipulation.
+
+```diff
+ where d1.d_week_seq = d2.d_week_seq
+   and inv_quantity_on_hand < cs_quantity 
+-  and d3.d_date > d1.d_date + 5
++  and d3.d_date > date_add(d1.d_date, 5)
+   and hd_buy_potential = '1001-5000'
+   and d1.d_year = 2001
+```
+
+* Spark only. For queries 94 and 95,
+we rewrite the date range condition to use explicit date conversion
+because Spark 4.0.0 does not interpret `1999-5-01` as `1999-05-01`. 
+
+```diff
+-     d_date between '1999-5-01' and 
+-            (cast('1999-5-01' as date) + interval '60' days)
++     d_date between cast('1999-5-01' as date) and 
++            date_add(cast('1999-5-01' as date), 60)
+```
+
+The scale factor for the TPC-DS benchmark is **10TB.**
+
+We generate datasets in ORC format with Snappy compression.
+
+:::info
+Spark is known to perform better on Parquet datasets.
+Our internal experiments, however, show that the difference is not significant,
+and using Parquet for Spark is unlikely to change the overall conclusions of this article.
+:::
+
+### Configuration
+
+We use the following Java versions.
+
+1. **Java 23** for Trino 468 (required by Trino)
+2. **Java 21** for Spark 4.0.0-RC2 
+3. **Java 8** for Hive 4.0.0 on Tez (required by Hive on Tez)
+4. **Java 22** for Hive 4.0.0 on MR3 2.0 
+
+For Trino, we use a JVM option `-Xmx196G` and choose the following configuration
+after performance tuning:
+```
+memory.heap-headroom-per-node=58GB
+query.max-total-memory=1680GB
+query.max-memory-per-node=120GB
+query.max-memory=1440GB
+sink.max-buffer-size=256MB
+node-scheduler.policy=uniform
+optimizer.optimize-metadata-queries=true
+```
+
+For Spark, we set `spark.executor.memory=196g` and `spark.executor.memoryOverhead=20g`
+to configure the basic memory allocation for Spark executors.
+Among the configuration keys we tune for performance,
+the following three are worth highlighting:
+```
+spark.sql.adaptive.enabled=true
+spark.sql.autoBroadcastJoinThreshold=500000000
+spark.sql.join.preferSortMergeJoin=true
+```
+In particular,
+we observe that increasing `spark.sql.autoBroadcastJoinThreshold`
+(from its default value of 10MB)
+generally reduces query execution time,
+but setting it beyond 500000000 (about 500MB) causes some TPC-DS queries to fail.
+
+The configuration for Hive on Tez and Hive on MR3 is
+based on the the default configuration in the MR3 release.
+For Hive on Tez, we assign 8GB of memory to each YARN container.
+For Hive on MR3,
+we use a JVM option `-Xmx86G` for every worker and create two workers on each node.
+
+### Tests
+
+#### Sequential tests
+
+In a sequential test, we submit 99 queries from the TPC-DS benchmark.
+We report the total execution time,
+the geometric mean of execution times,
+and the execution time of each individual query.
+
+#### Concurrent tests
+
+In a concurrent test, we use a concurrency level of 10, 20, or 40
+and start the same number of clients,
+each submitting queries 30 to 49 from the TPC-DS benchmark.
+None of these 20 queries are long-running, and they can be considered interactive queries.
+To better simulate realistic environments,
+each client submits the 20 queries in a unique sequence.
+
+For each run, we measure the longest execution time among all clients.
+Since the cluster remains busy until the last client finishes executing its queries,
+this longest execution time can be viewed as the cost of executing queries for all clients.
+For the last client, we also report the execution time of each individual query
+to evaluate fairness in resource allocation.
+
+We exclude Hive on Tez from concurrent tests
+because each query runs in isolation using separate YARN containers,
+resulting in no meaningful interaction between concurrent queries.
+Increasing the concurrency level simply increases total execution time proportionally 
+(or worse because of scheduling overhead).
+
+## Raw data of the experiment results
+
+For the reader&apos;s perusal,
+we attach the table containing the raw data of the experiment results.
+Here is a link to [[Google Docs](https://docs.google.com/spreadsheets/d/1Qxn2VowXrcNbn6xpmIkONF5Q_JBQqFzANfFMKlP7Cog/edit?gid=0#gid=0)].
+<iframe 
+  src="https://docs.google.com/spreadsheets/d/1Qxn2VowXrcNbn6xpmIkONF5Q_JBQqFzANfFMKlP7Cog/edit?gid=0#gid=0?embedded=true" 
+  width="100%" 
+  height="450px" 
+  style={{ border: "none" }}
+></iframe>
+
+## Analysis of sequential tests
+
+### Query completion
+
+Every system completes all queries successfully.
+
+### Correctness
+
+The three systems agree on the results with the following exception:
+
+* For both subqueries of query 23,
+Trino returns no rows,
+whereas Spark and Hive on Tez/MR3 return a single row with identical contents.
+
+As all the systems under comparison have been developed independently,
+we can conclude (with high confidence) that **Trino returns wrong results for query 23.**
+We believe that
+this correctness bug was introduced after PrestoSQL was rebranded as Trino,
+as Presto 317 returns correct results for query 23.
+
+It is important to distinguish between failing to complete a query and returning incorrect results.
+While execution failures are visible and often recoverable,
+returning wrong results is a silent correctness issue
+that can lead to incorrect decisions and undetected data quality issues.
+Trino completes query 23 without error, but the results are incorrect.
+**This is more serious than query failures.**
+
+### Total execution time
+
+In terms of total execution time, **Trino is the fastest**.
+
+* Trino completes all queries in **4,442** seconds.
+* Spark completes all queries in **15,678** seconds.
+* Hive on Tez completes all queries in **12,707** seconds.
+* Hive on MR3 completes all queries in **4,874** seconds.
+
+![mr3.2.0.total.execution-fs8.png](/img/mr3.2.0/mr3.2.0.total.execution-fs8.png)
+
+Perhaps surprisingly, Spark shows a longer total execution time than Hive on Tez.
+This does not, however, necessarily mean that it is the slowest system overall.
+The top two longest-running queries for Spark, queries 24-1 and 24-2,
+account for about 30% of the total execution time,
+whereas the top two queries for Hive on Tez make up only about 18%.
+This indicates that
+the total execution time for Spark is more heavily skewed by a small number of outlier queries.
+As we will see in the response time analysis later,
+Spark responds much faster than Hive on Tez for most queries.
+
+![mr3.2.0.longest.running-fs8.png](/img/mr3.2.0/mr3.2.0.longest.running-fs8.png)
+
+Hive on MR3 significantly outperforms Hive on Tez,
+demonstrating the impact of the MR3 execution engine when paired with the same Hive front-end.
+In terms of total execution time, Hive on MR3 is only 9.7% slower than Trino,
+making it remarkably close.
+This result highlights Hive on MR3 as a strong contender for both compatibility and performance.
+Trino may run at ludicrous speed,
+but Hive on MR3 is right behind — with fault tolerance and full Hive compatibility.
+
+:::info
+We experimented with enabling fault tolerance in Trino,
+which involves writing intermediate data to HDFS.
+Interestingly, for quite a few queries,
+Trino with fault tolerance actually ran faster than without it.
+(Similar results have been reported elsewhere.)
+However, when running large queries such as query 67 or query 78,
+the Trino coordinator crashed, bringing down the entire system.
+After encountering repeated crashes, we decided not to pursue fault-tolerant mode further.
+:::
+
+### Average response time
+
+For average response time,
+we use the geometric mean of execution times,
+as it takes into account outlier queries that run unusually short or long.
+
+In terms of average response time, **Trino remains the fastest**.
+
+* Trino completes each query in **17.49** seconds on average.
+* Spark completes each query in **37.65** seconds on average.
+* Hive on Tez completes each query in **57.00** seconds on average.
+* Hive on MR3 completes each query in **19.76** seconds on average.
+
+![mr3.2.0.average.response-fs8.png](/img/mr3.2.0/mr3.2.0.average.response-fs8.png)
+
+We observe that Trino retains its lead, but Hive on MR3 is again very close
+as it is only about 13% slower.
+For Spark, it performs better than its total execution time suggests,
+with an average response time significantly lower than Hive on Tez.
+This result supports the view that the total execution time is partially skewed
+by a small number of outlier queries.
+Hive on Tez is the slowest system,
+primarily because it launches new YARN containers for each query,
+thus incurring substantial overhead.
+The lack of worker reuse across queries also reduces the opportunity for JIT optimization,
+particularly for short-running queries.
+
+## Analysis of concurrent tests
+
+### Query completion
+
+Every system successfully completes all queries at concurrency levels of 10, 20, or 40.
+
+### Longest execution time
+
+In terms of longest execution time, **Hive on MR3 is the fastest.**
+For concurrency levels of 10, 20, and 40:
+
+* Trino completes all queries in **2,439**, **4,867**, and **9,898** seconds, respectively.
+* Spark completes all queries in **3,168**, **6,557**, and **13,410** seconds, respectively.
+* Hive on MR3 completes all queries in **1,947**, **3,978**, and **8,160** seconds, respectively.
+
+![mr3.2.0.concurrent.total-fs8.png](/img/mr3.2.0/mr3.2.0.concurrent.total-fs8.png)
+
+The results for a concurrency level of 1 are obtained from the previous sequential tests.
+
+We observe that Hive on MR3 consistently leads at all concurrency levels.
+For example, at a concurrency level of 40,
+Hive on MR3 is 21.3% faster than Trino and 64.3% faster than Spark.
+Although Hive on MR3 is not the fastest in sequential runs,
+it delivers the best performance under concurrent workloads,
+which more closely reflect typical production environments.
+
+### Concurrency factor
+
+To quantify the overall efficiency in managing concurrent workloads,
+we define a new metric called **concurrency factor**,
+which can be thought of as a normalized per-query execution time.
+
+* concurrency factor = longest execution time in a concurrent test 
+÷ (concurrency level * total execution time in an equivalent sequential test)
+
+Thus a concurrency factor indicates
+''how long it takes to complete a single query in a concurrent test,
+relative to the time required to complete the same query in a sequential test.''
+
+Here are a few examples:
+
+* A concurrency factor of 0.4 means that a query taking 100 seconds in a sequential test takes 40 seconds on average in a concurrent test.
+* For a system that performs no optimization for concurrecy and
+simply executes all incoming queries serially,
+we obtain a concurrency factor of 1.
+(Hive on Tez has a concurrency factor close to 1
+because no resources are shared across queries.)
+* For a system that caches query results and skips execution for duplicate queries,
+the concurrency factor may approach the ideal value of '1 / concurrency level'.
+* For a system that incurs excessive overhead in executing concurrent queries,
+the concurrency factor may exceed 1.
+
+The following graph shows concurrency factors obtained from the concurrent tests.
+
+![mr3.2.0.concurrency.factor-fs8.png](/img/mr3.2.0/mr3.2.0.concurrency.factor-fs8.png)
+
+We observe that 
+with concurrency factors of 0.45 to 0.48,
+**Spark is the most efficient in managing concurrent workloads**
+based on normalized per-query execution time.
+Spark, however, remains the slowest system overall,
+as its sequential execution time is significantly longer:
+705 seconds compared with 348 seconds of Trino and 371 seconds of Hive on MR3.
+
+From the analysis of concurrency factors,
+we draw the following conclusions:
+
+* In comparison with Trino, Hive on MR3 runs faster
+because of **its higher efficiency in handling concurrent workloads.**
+* In comparison with Spark, Hive on MR3 runs faster
+because of **its higher efficiency in executing individual queries.**
+
+### Standard deviation of query execution times
+
+To evaluate fairness and consistency in resource allocation under concurrency,
+we measure the standard deviation of query execution times from the longest-running client.
+A low standard deviation suggests that queries are being processed at a consistent rate,
+with no major delays or bottlenecks.
+In contrast,
+a high standard deviation indicates that some queries may be significantly slower,
+possibly due to uneven resource allocation.
+
+The following graph shows standard deviations from the concurrent tests.
+
+![mr3.2.0.concurrent.sdv-fs8.png](/img/mr3.2.0/mr3.2.0.concurrent.sdv-fs8.png)
+
+We observe significant differences
+in how consistently each system executes queries under concurrent workloads.
+**Hive on MR3 shows the lowest standard deviation across all concurrency levels,**
+indicating that it delivers the most balanced query execution.
+In contrast,
+Trino shows the highest standard deviation, which increases sharply with concurrency.
+At a concurrency level of 40, for example,
+three queries take more than 1,000 seconds to complete.
+
+## Summary of the analysis
+
+This performance evaluation of Trino, Spark, and Hive on Tez/MR3
+using the 10TB TPC-DS benchmark reveals several key findings.
+
+* **Correctness.** All systems complete every query,
+but Trino returns incorrect results for both subqueries of query 23,
+an error more serious than query failures.
+* **Total Execution Time (Sequential).**
+Trino is the fastest, followed closely by Hive on MR3,
+which significantly outperformed Hive on Tez.
+Spark is the slowest, skewed by a few outlier queries.
+* **Average Response Time (Sequential).**
+Trino maintains the lead in average response time,
+with Hive on MR3 again closely behind.
+* **Longest Execution Time (Concurrent).**
+Under concurrent workloads (10, 20, and 40 clients),
+Hive on MR3 consistently outperforms both Trino and Spark.
+* **Concurrency Efficiency.**
+Spark demonstrates the highest efficiency in managing concurrent workloads.
+It remains the slowest overall, however, because of long sequential query execution times.
+* **Fairness and Consistency.** 
+Hive on MR3 is the most consistent in query execution times under concurrency,
+as indicated by its lowest standard deviation.
+
+## Conclusions
+
+As the race comes to a close, here is our final verdict:
+
+* Trino runs at ludicrous speed, but sometimes stumbles on accuracy and wobbles on concurrency.
+* Apache Spark is still the Swiss Army knife, though sometimes slower on individual queries.
+* Apache Hive remains the tortoise of the data race — slow but reliable.
+* Hive on MR3 is a surprisingly swift tortoise new to the race.
+
+Hive on MR3 is a system designed to support interactive and batch workloads
+in a single fault-tolerant system.
+With built-in capacity scheduling,
+it allows interactive queries to take priority without delaying batch jobs.
+This unified design simplifies operations, reduces infrastructure costs, and
+eliminates the need to maintain multiple platforms.
+
+Hive on MR3 runs on Hadoop, on Kubernetes, and in standalone mode.
+See the [quick start guides](/docs/quick/) to try Hive on MR3.
+
