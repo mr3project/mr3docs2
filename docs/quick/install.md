@@ -28,9 +28,6 @@ Download Hive on MR3.
 
 That's it!
 
-:::caution
-**Hive on MR3 2.0 (`hive4-mr3-2.0.tar.gz`) is currently in preview and has not been officially released.**
-:::
 :::info
 For running Hive on MR3 **on Hadoop**,
 it suffices to install Hive on MR3 only on the master node (where HiveServer2 is executed).

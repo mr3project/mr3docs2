@@ -6,7 +6,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
   title: 'Hive on MR3',
-  tagline: 'Apache Hive powered by a new execution engine MR3',
+  tagline: 'Apache Hive powered by the MR3 execution engine',
   favicon: 'img/mr3.svg',
 
   // Set the production url of your site here
@@ -68,8 +68,9 @@ const config: Config = {
 
   themeConfig: {
     metadata: [
-      {name: 'keywords', content: 'Hive, MR3, big data, analytics'},
-      {name: 'description', content: 'Documentation for Hive on MR3, a unified interactive and batch data warehouse'},
+      {name: 'description', content: 'Hive on MR3 is a fast Hive and Spark SQL alternative that runs natively on Kubernetes. Learn how to deploy, configure, and operate Hive on MR3.'},
+      {name: 'keywords', content: 'Hive on MR3, Hive Kubernetes, Hive on Kubernetes, Spark SQL, big data processing, MR3 execution engine'},
+      {name: 'author', content: 'DataMonad'},
     ],
     image: 'img/mr3.svg',
     docs: {

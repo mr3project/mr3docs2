@@ -266,6 +266,16 @@ To use HDFS/S3, follow the instruction in **2. Using HDFS/S3**.
 
 ### 1. Creating and mounting PersistentVolume
 
+The environment variable `CREATE_PERSISTENT_VOLUME` in `env.sh` specifies
+whether or not to create a PersistentVolume.
+
+```sh
+# terminal-command
+vi env.sh
+
+CREATE_PERSISTENT_VOLUME=true
+```
+
 The manifest `yaml/workdir-pv.yaml` defines a PersistentVolume.
 The user should update it in order to use a desired type of PersistentVolume.
 In our example,
@@ -299,6 +309,16 @@ spec:
 ```
 
 ### 2. Using HDFS/S3
+
+As we do not use a PersistentVolume,
+set `CREATE_PERSISTENT_VOLUME` to false in `env.sh`.
+
+```sh
+# terminal-command
+vi env.sh
+
+CREATE_PERSISTENT_VOLUME=false
+```
 
 Set the configuration keys `hive.exec.scratchdir` and `hive.query.results.cache.directory` in `conf/hive-site.xml` to point to the directory on HDFS or S3 for storing transient data.
 

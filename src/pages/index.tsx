@@ -33,8 +33,8 @@ export default function Home(): ReactNode {
   const {siteConfig} = useDocusaurusContext();
   return (
     <Layout
-      title="MR3 Documentation"
-      description="MR3 Documentation">
+      title="Hive on MR3 — Run Hive on Kubernetes, a Spark SQL Alternative"
+      description="Hive on MR3 is a fast Hive and Spark SQL alternative that runs natively on Kubernetes.">
       <HomepageHeader />
       <main>
         <HomepageFeatures />
