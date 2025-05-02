@@ -1,6 +1,6 @@
 ---
 title: 'TPC-DS Benchmark: Trino 468, Spark 4.0.0-RC2, and Hive 4 on MR3 2.0'
-description: '10TB TPC-DS benchmark results of Trino 468, Spark 4.0.0-RC2, and Hive 4 on MR3 2.0'
+description: 'TPC-DS benchmark results of Trino 468, Spark 4.0.0-RC2, and Hive 4 on MR3 2.0'
 slug: 2025-04-18-performance-evaluation-2.0
 authors: [glapark]
 tags: [Trino, Spark, Tez, Hive, Hive 4, TPC-DS]
@@ -11,12 +11,11 @@ import Head from '@docusaurus/Head';
 
 <Head>
   <title>Trino, Spark, and Hive TPC-DS Benchmark Comparison</title>
-  <meta name="description" content="Compare the 10TB TPC-DS benchmark results of Trino 468, Spark 4.0.0-RC2, and Hive 4 on MR3 2.0." />
+  <meta name="description" content="Compare the TPC-DS benchmark results of Trino, Spark, and Hive on Tez/MR3." />
 </Head>
 
-In this article, we evaluate the performance of the following systems
-on the 10TB TPC-DS Benchmark,
-focusing on Trino TPC-DS, Spark TPC-DS, and Hive TPC-DS scenarios:
+In this article, we evaluate the performance of
+Trino, Spark, Hive on Tez, and Hive on MR3 using the TPC-DS Benchmark with a scale factor of 10TB.
 
 1. Trino 468 (released in December 2024)
 2. Spark 4.0.0-RC2 (released in March 2025)
@@ -120,7 +119,7 @@ because Spark 4.0.0 does not interpret `1999-5-01` as `1999-05-01`.
 +            date_add(cast('1999-5-01' as date), 60)
 ```
 
-The scale factor for the TPC-DS benchmark is **10TB.**
+The scale factor for the TPC-DS benchmark is 10TB.
 
 We generate datasets in ORC format with Snappy compression.
 
