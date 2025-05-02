@@ -76,35 +76,22 @@ Usually it suffices to include three hosts: 1) the host running MySQL for Ranger
 In our example,
 `orange0` is the host running MySQL for Ranger and `orange1` is the host name assigned to HiveServer2 and Ranger.
 
-## PersistentVolume for Ranger
+## PersistentVolumeClaim 
 
-We need a PersistentVolume for storing data for Ranger.
-The user should update `ranger/values-ranger.yaml` to use a desired type of PersistentVolume.
-In our example, we create a PersistentVolume using NFS.
-The PersistentVolume should be writable to user `nobody` (corresponding to root user).
+Ranger uses the PersistentVolumeClaim `workdir-pvc` created for Hive on MR3.
+The PersistentVolume should be **writable to user `nobody` (corresponding to root user)**.
 
-Open `ranger/values-ranger.yaml` and set the following fields. 
+To use a local directory inside the Docker container instead
+(e.g., if PersistentVolumeClaim is not created for Hive on MR3),
+set the field `workDir.use` to false.
 
 ```yaml
 # terminal-command
 vi ranger/values-ranger.yaml
 
 workDir:
-  isNfs: true
-  nfs:
-    server: "192.168.10.1"
-    path: "/home/nfs/hivemr3"
-  volumeSize: 10Gi
-  volumeClaimSize: 10Gi
-  storageClassName: ""
-  volumeStr: 
+  use: false
 ```
-
-* `workDir.isNfs` specifies whether the PersistentVolume uses NFS or not.
-* `workDir.nfs.server` and `workDir.nfs.path` specify the address of the NFS server and the path exported by the NFS server (when `workDir.isNfs` is set to true).
-* `workDir.volumeSize` and `workDir.volumeClaimSize` specify the size of the PersistentVolume and the PersistentVolumeClaim.
-* `workDir.storageClassName` specifies the StorageClass of the PersistentVolume.
-* `workDir.volumeStr` specifies the PersistentVolume to use when `workDir.isNfs` is set to false. For example, `volumeStr: "hostPath:\n  path: /work/nfs/mr3-run-work-dir"` creates a hostPath PersistentVolume.
 
 ## `hive/conf/hive-site.xml`
 

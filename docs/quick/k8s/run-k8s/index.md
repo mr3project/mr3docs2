@@ -267,7 +267,7 @@ To use HDFS/S3, follow the instruction in **2. Using HDFS/S3**.
 ### 1. Creating and mounting PersistentVolume
 
 The environment variable `CREATE_PERSISTENT_VOLUME` in `env.sh` specifies
-whether or not to create a PersistentVolume.
+whether or not to create a PersistentVolume and a corresponding PersistentVolumeClaim.
 
 ```sh
 # terminal-command
@@ -275,6 +275,12 @@ vi env.sh
 
 CREATE_PERSISTENT_VOLUME=true
 ```
+
+:::info
+Set `CREATE_PERSISTENT_VOLUME` to false
+if a PersistentVolume and a corresponding PersistentVolumeClaim have already been created
+(e.g., on Amazon EKS).
+:::
 
 The manifest `yaml/workdir-pv.yaml` defines a PersistentVolume.
 The user should update it in order to use a desired type of PersistentVolume.

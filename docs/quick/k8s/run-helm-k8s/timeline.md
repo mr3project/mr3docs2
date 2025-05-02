@@ -99,35 +99,22 @@ The user should specify an IP address with a valid host name.
 * `hostAliases` lists aliases for hosts that may not be found in the default DNS.
 It should include the host assigned to the Service for exposing MR3-UI and Grafana.
 
-## PersistentVolume for MR3-UI and Grafana
+## PersistentVolumeClaim
 
-We need a PersistentVolume for storing data for MR3-UI and Prometheus.
-The user should update `timeline/values-timeline.yaml` to use a desired type of PersistentVolume.
-In our example, we create a PersistentVolume using NFS.
-The PersistentVolume should be writable to the user with UID 1000.
+MR3-UI and Grafana use the PersistentVolumeClaim `workdir-pvc` created for Hive on MR3.
+The PersistentVolume should be **writable to the user with UID 1000.**
 
-Open `timeline/values-timeline.yaml` and set the following fields. 
+To use a local directory inside the Docker container instead
+(e.g., if PersistentVolumeClaim is not created for Hive on MR3),
+set the field `workDir.use` to false.
 
 ```yaml
 # terminal-command
 vi timeline/values-timeline.yaml
 
 workDir:
-  isNfs: true
-  nfs:
-    server: "192.168.10.1"
-    path: "/home/nfs/hivemr3"
-  volumeSize: 10Gi
-  volumeClaimSize: 10Gi
-  storageClassName: ""
-  volumeStr:
+  use: false
 ```
-
-* `workDir/isNfs` specifies whether the PersistentVolume uses NFS or not.
-* `workDir/nfs/server` and `workDir/nfs/path` specify the address of the NFS server and the path exported by the NFS server (when `workDir/isNfs` is set to true).
-* `workDir/volumeSize` and `workDir/volumeClaimSize` specify the size of the PersistentVolume and the PersistentVolumeClaim.
-* `workDir/storageClassName` specifies the StorageClass of the PersistentVolume.
-* `workDir/volumeStr` specifies the PersistentVolume to use when `workDir/isNfs` is set to false. For example, `volumeStr: "hostPath:\n  path: /work/nfs/mr3-run-work-dir"` creates a hostPath PersistentVolume.
 
 ## `hive/conf/mr3-site.xml`
 

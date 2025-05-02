@@ -48,8 +48,7 @@ To run MR3-UI and Grafana, we need to check or update the following files.
 ```yaml
 ├── yaml
 │   ├── timeline-service.yaml
-│   ├── timeline.yaml
-│   └── workdir-pv-timeline.yaml
+│   └── timeline.yaml
 ├── conf
 │   ├── mr3-site.xml
 │   └── yarn-site.xml
@@ -97,43 +96,13 @@ spec:
 It should include the host assigned to the Service created in the previous step.
 * The `image` field in the `spec.containers` section specifies the Docker image for MR3-UI and Grafana.
 
-## `yaml/workdir-pv-timeline.yaml`
+## PersistentVolumeClaim
 
-This manifest defines a PersistentVolume for storing data for MR3-UI and Prometheus.
-The user should update it in order to use a desired type of PersistentVolume.
-The PersistentVolume should be writable to the user with UID 1000.
+MR3-UI and Grafana use the PersistentVolumeClaim `workdir-pvc` created for Hive on MR3.
+The PersistentVolume should be **writable to the user with UID 1000.**
 
-```yaml
-# terminal-command
-vi yaml/workdir-pv-timeline.yaml
-
-spec:
-  nfs:
-    server: "192.168.10.1"
-    path: "/home/nfs/hivemr3"
-```
-
-:::info
-To reuse the PersistentVolume created by `yaml/workdir-pv.yaml`,
-use the PersistentVolumeClaim `workdir-pvc`
-and update `run-timeline.sh` to skip the creation of a new PersistentVolume for MR3-UI/Grafana.
-
-```yaml
-# terminal-command
-vi yaml/timeline.yaml
-
-spec:
-  template:
-    spec:
-      volumes:
-      - name: work-dir-volume
-        persistentVolumeClaim:
-          claimName: workdir-pvc
-```
-:::
-
-:::info
-To use local directories inside the Docker containers instead,
+To use local directories inside the Docker containers instead
+(e.g., if PersistentVolumeClaim is not created for Hive on MR3),
 comment out the following lines.
 
 ```yaml
@@ -147,8 +116,8 @@ vi yaml/timeline.yaml
 
 # - name: timeline-work-dir-volume
 #   persistentVolumeClaim:
-#     claimName: workdir-pvc-timeline
-:::
+#     claimName: workdir-pvc
+```
 
 ## `conf/mr3-site.xml`
 
@@ -236,8 +205,6 @@ In order to run MR3-UI and Grafana, execute the script `run-timeline.sh`.
 # terminal-command
 ./run-timeline.sh 
 Error from server (AlreadyExists): namespaces "hivemr3" already exists
-persistentvolume/workdir-pv-timeline created
-persistentvolumeclaim/workdir-pvc-timeline created
 Error from server (AlreadyExists): secrets "env-secret" already exists
 configmap/hivemr3-timeline-conf-configmap created
 secret/hivemr3-timeline-secret created

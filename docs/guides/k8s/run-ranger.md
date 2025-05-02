@@ -19,14 +19,8 @@ The following files configure Kubernetes objects for Ranger.
 ├── env.sh
 └── yaml
     ├── ranger-service.yaml
-    ├── ranger.yaml
-    ├── workdir-pv-ranger.yaml
-    └── workdir-pvc-ranger.yaml
+    └── ranger.yaml
 ```
-
-Ranger uses `workdir-pv-ranger.yaml` and `workdir-pvc-ranger.yaml`
-which can be configured similarly to `workdir-pv.yaml` and `workdir-pvc.yaml`.
-The PersistentVolume should be writable to user nobody (corresponding to root user).
 
 ### `env.sh`
 

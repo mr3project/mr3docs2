@@ -20,14 +20,8 @@ The following files configure Kubernetes objects for Timeline Server.
 ├── env.sh
 └── yaml
     ├── timeline-service.yaml
-    ├── timeline.yaml
-    ├── workdir-pv-timeline.yaml
-    └── workdir-pvc-timeline.yaml
+    └── timeline.yaml
 ```
-
-Timeline Server uses `workdir-pv-timeline.yaml` and `workdir-pvc-timeline.yaml` 
-which can be configured similarly to `workdir-pv.yaml` and `workdir-pvc.yaml`.
-The PersistentVolume should be writable to the user with UID 1000.
 
 ### `env.sh`
 

@@ -15,8 +15,7 @@ To run Ranger, we need to check or update the following files.
 ```yaml
 ├── yaml
 │   ├── ranger-service.yaml
-│   ├── ranger.yaml
-│   └── workdir-pv-ranger.yaml
+│   └── ranger.yaml
 ├── conf
 │   ├── hive-site.xml
 │   ├── ranger-hive-audit.xml
@@ -80,44 +79,13 @@ In our example,
 * The `image` field in the `spec.containers` section specifies the Docker image for Ranger.
 We use the pre-built Docker image `mr3project/ranger:2.6.0`.
 
-## `yaml/workdir-pv-ranger.yaml`
+## PersistentVolumeClaim
 
-This manifest defines a PersistentVolume for storing data for Ranger.
-The user should update it to use a desired type of PersistentVolume.
-In our example, we create a PersistentVolume using NFS.
-The PersistentVolume should be writable to user `nobody` (corresponding to root user).
+Ranger uses the PersistentVolumeClaim `workdir-pvc` created for Hive on MR3.
+The PersistentVolume should be **writable to user `nobody` (corresponding to root user)**.
 
-```yaml
-# terminal-command
-vi yaml/workdir-pv-ranger.yaml
-
-spec:
-  nfs:
-    server: "192.168.10.1"
-    path: "/home/nfs/hivemr3"
-```
-
-:::info
-To reuse the PersistentVolume created by `yaml/workdir-pv.yaml`,
-use the PersistentVolumeClaim `workdir-pvc`
-and update `run-ranger.sh` to skip the creation of a new PersistentVolume for Ranger.
-
-```yaml
-# terminal-command
-vi yaml/ranger.yaml
-
-spec:
-  template:
-    spec:
-      volumes:
-      - name: work-dir-volume
-        persistentVolumeClaim:
-          claimName: workdir-pvc
-```
-:::
-
-:::info
-To use a local directory inside the Docker container instead,
+To use a local directory inside the Docker container instead
+(e.g., if PersistentVolumeClaim is not created for Hive on MR3),
 comment out the following lines.
 
 ```yaml
@@ -129,9 +97,8 @@ vi yaml/ranger.yaml
 
 # - name: work-dir-volume
 #   persistentVolumeClaim:
-#     claimName: workdir-pvc-ranger
+#     claimName: workdir-pvc
 ```
-:::
 
 ## `conf/hive-site.xml`
 
@@ -301,8 +268,6 @@ In order to run Ranger, the user can execute the script `run-ranger.sh`
 # terminal-command
 ./run-ranger.sh 
 namespace/hivemr3 created
-persistentvolume/workdir-pv-ranger created
-persistentvolumeclaim/workdir-pvc-ranger created
 configmap/hivemr3-ranger-conf-configmap created
 secret/hivemr3-ranger-secret created
 deployment.apps/hivemr3-ranger created

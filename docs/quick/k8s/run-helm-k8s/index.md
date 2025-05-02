@@ -223,12 +223,22 @@ To use HDFS/S3, follow the instruction in **2. Using HDFS/S3**.
 
 ### 1. Creating and mounting PersistentVolume
 
-The `workDir` fields in `hive/values-hive.yaml` specify how to create a PersistentVolume.
+The `workDir` fields in `hive/values-hive.yaml`
+specify how to create a PersistentVolume and a corresponding PersistentVolumeClaim.
+
+* The field `workDir.create` specifies whether or not to create PersistentVolume and PersistentVolumeClaim.
+* The field `workDir.use` specifies whether or not use PersistentVolumeClaim.
+
+:::info
+Set `workDir.create` to false (but **`workDir.use` to true**)
+if a PersistentVolume and a corresponding PersistentVolumeClaim have already been created (e.g., on Amazon EKS).
+:::
+
 In our example, we use an NFS volume by setting `workDir.isNfs` to true.
 The NFS server runs at 192.168.10.1, uses a directory `/home/nfs/hivemr3`,
 and allows up to 100GB of disk space.
 We also specify the size of the storage to be used by Hive on MR3 in `workDir.volumeClaimSize`.
-The PersistentVolume should be writable to the user with UID 1000.
+The PersistentVolume should be **writable to the user with UID 1000.**
 
 ```yaml
 # terminal-command
@@ -236,6 +246,7 @@ vi hive/values-hive.yaml
 
 workDir:
   create: true
+  use: true
   isNfs: true
   nfs:
     server: "192.168.10.1"
@@ -252,13 +263,15 @@ to a string to be used in `hive/templates/workdir-pv.yaml`.
 ### 2. Using HDFS/S3
 
 As we do not use a PersistentVolume,
-set the field `workDir.create` to false in `hive/values-hive.yaml`.
+set both fields `workDir.create` and `workDir.use` to false in `hive/values-hive.yaml`.
+
 ```yaml
 # terminal-command
 vi hive/values-hive.yaml
 
 workDir:
   create: false
+  use: false
 ```
 
 Set the configuration keys `hive.exec.scratchdir` and `hive.query.results.cache.directory` in `hive/conf/hive-site.xml` to point to the directory on HDFS or S3 for storing transient data.
