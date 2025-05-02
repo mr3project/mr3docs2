@@ -1,14 +1,22 @@
 ---
-title: 'Performance Evaluation of Trino 468, Spark 4.0.0-RC2, and Hive 4 on MR3 2.0 using the TPC-DS Benchmark'
-description: 'Performance Evaluation of Trino 468, Spark 4.0.0-RC2, and Hive 4 on MR3 2.0 using the TPC-DS Benchmark'
+title: 'TPC-DS Benchmark: Trino 468, Spark 4.0.0-RC2, and Hive 4 on MR3 2.0'
+description: '10TB TPC-DS benchmark results of Trino 468, Spark 4.0.0-RC2, and Hive 4 on MR3 2.0'
 slug: 2025-04-18-performance-evaluation-2.0
 authors: [glapark]
-tags: [Hive 4, Hive, Trino, Spark, Tez, TPC-DS]
+tags: [Trino, Spark, Tez, Hive, Hive 4, TPC-DS]
 hide_table_of_contents: false
 ---
 
-In this article, we report the results of evaluating the performance of the following systems
-using the 10TB TPC-DS Benchmark.
+import Head from '@docusaurus/Head';
+
+<Head>
+  <title>Trino, Spark, and Hive TPC-DS Benchmark Comparison</title>
+  <meta name="description" content="Compare the 10TB TPC-DS benchmark results of Trino 468, Spark 4.0.0-RC2, and Hive 4 on MR3 2.0." />
+</Head>
+
+In this article, we evaluate the performance of the following systems
+on the 10TB TPC-DS Benchmark,
+focusing on Trino TPC-DS, Spark TPC-DS, and Hive TPC-DS scenarios:
 
 1. Trino 468 (released in December 2024)
 2. Spark 4.0.0-RC2 (released in March 2025)
@@ -439,5 +447,5 @@ This unified design simplifies operations, reduces infrastructure costs, and
 eliminates the need to maintain multiple platforms.
 
 Hive on MR3 runs on Hadoop, on Kubernetes, and in standalone mode.
-See the [quick start guides](/docs/quick/) to try Hive on MR3.
+Visit the [Quick Start Guides](/docs/quick/) to try Hive on MR3.
 
