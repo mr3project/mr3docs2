@@ -108,6 +108,11 @@ const config: Config = {
           position: 'left',
           label: 'Release Notes',
         },
+        {
+          to: 'https://datamonad.com',
+          position: 'right', 
+          html: '<img src="/img/logo-white.svg" alt="DataMonad" height="18" style="vertical-align: middle;" />'
+        },
         {to: '/blog', label: 'Blog', position: 'right'},
         {
           href: 'https://github.com/mr3project/mr3',
@@ -156,6 +161,10 @@ const config: Config = {
         {
           title: 'More',
           items: [
+            {
+              label: 'DataMonad',
+              to: 'https://datamonad.com',
+            },
             {
               label: 'Blog',
               to: '/blog',
