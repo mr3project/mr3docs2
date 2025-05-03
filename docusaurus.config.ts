@@ -110,8 +110,8 @@ const config: Config = {
         },
         {
           to: 'https://datamonad.com',
-          position: 'right', 
-          html: '<img src="/img/logo-white.svg" alt="DataMonad" height="18" style="vertical-align: middle;" />'
+          position: 'right',
+          html: '<img src="/img/logo-white.svg" alt="DataMonad" class="datamonad-logo" style="vertical-align: middle;" />'
         },
         {to: '/blog', label: 'Blog', position: 'right'},
         {

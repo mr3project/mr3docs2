@@ -48,3 +48,9 @@
     transform-origin: center;
 }
 
+.datamonad-logo {
+  height: 0.85rem;
+  width: auto;
+  max-width: 100%;
+}
+
