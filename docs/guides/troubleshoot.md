@@ -116,7 +116,7 @@ the user may have to adjust the values for the following configuration keys in `
 
 For more details, see [Access to S3](./performance/s3-tuning).
 
-## A non-deterministic query (i.e., one whose result can vary with each execution) may fail even when fault tolerance is enabled.
+### A non-deterministic query (i.e., one whose result can vary with each execution) may fail even when fault tolerance is enabled.
 
 By default,
 MR3 assumes that DAGs consist of determinate Vertexes whose output is always the same given the same input.
@@ -125,6 +125,19 @@ A non-deterministic query, however, produces a DAG with indeterminate Vertexes w
 To handle such cases, the user must inform MR3 of the presence of indeterminate Vertexes
 by setting the configuration key `hive.mr3.dag.include.indeterminate.vertex` to true.
 Note that fault tolerance is not supported for these DAGs when fetch failures occur.
+
+## Iceberg
+
+### Loading Iceberg tables fails.
+
+An example of an error message is:
+
+```sh
+org.apache.iceberg.exceptions.NotFoundException: Can not read or parse commitTask manifest file: hdfs://kbhadoop01:9000/hivemr3/warehouse/blacklight.db/monthly_question_i/temp/hive_20250508170807_7d7e1f3e-8bf3-4b7a-80fa-205d2cb48a7b-job_80331_0000/task-584.forCommit
+```
+
+This can happen when [speculative execution](/docs/features/mr3/speculative) is enabled.
+The user can disable speculative execution by setting the configuration key `hive.mr3.am.task.concurrent.run.threshold.percent` to 100 in `hive-site.xml`.
 
 ## On Hadoop
 
